@@ -10,4 +10,7 @@
     <include relativeToChangelogFile="true" file="create-table/create-users-table.sql"/>
     <include relativeToChangelogFile="true" file="create-table/create-payment-cards-table.sql"/>
 
+    <include relativeToChangelogFile="true" file="create-indexe/create-payment-cards-index.sql"/>
+    <include relativeToChangelogFile="true" file="create-indexe/create-users-index.sql"/>
+
 </databaseChangeLog>
