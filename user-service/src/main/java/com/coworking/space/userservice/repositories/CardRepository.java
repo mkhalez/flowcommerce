@@ -34,7 +34,7 @@ public interface CardRepository extends JpaRepository<CardEntity, Integer>, JpaS
             WHERE id = :id
             """,
             nativeQuery = true)
-    void updateStatusById(@Param("id") int id);
+    void updateStatusById(@Param("id") int id, @Param("status") boolean status);
 
     int countByUserId(int userId);
 
@@ -46,4 +46,13 @@ public interface CardRepository extends JpaRepository<CardEntity, Integer>, JpaS
             """,
             nativeQuery = true)
     List<UserCardsCount> getUserCardsCount(@Param("ids") List<Integer> ids);
+
+    @Modifying
+    @Query(value = """
+            UPDATE payment_cards
+            SET active = :status
+            WHERE user_id = :user_id
+            """,
+            nativeQuery = true)
+    void updateAllStatusById(@Param("user_id") int userId, @Param("status") boolean status);
 }

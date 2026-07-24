@@ -12,6 +12,7 @@ import com.coworking.space.userservice.repositories.CardRepository;
 import com.coworking.space.userservice.repositories.UserRepository;
 import com.coworking.space.userservice.repositories.specification.CardSpecification;
 import com.coworking.space.userservice.services.CardService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ public class CardServiceImpl implements CardService {
     private final UserRepository userRepo;
     private final CardRepository cardRepo;
     private final CardMapper cardMapper;
+    private final CardSpecification cardSpecification;
 
     private static final String USER_NOT_FOUND_ERROR = "user not found";
     private static final String CARD_NOT_FOUND_ERROR = "card not found";
@@ -42,7 +44,7 @@ public class CardServiceImpl implements CardService {
 
         int cardCount = cardRepo.countByUserId(request.userId());
 
-        if (cardCount > MAX_CARD_NUMBER) {
+        if (cardCount >= MAX_CARD_NUMBER) {
             throw new ExceededLimitException(USER_CAN_NOT_HAVE_MORE_THAN_FIVE_CARD);
         }
 
@@ -64,7 +66,7 @@ public class CardServiceImpl implements CardService {
     public Page<CardResponse> findAll(int limit, int pageNum, String holder) {
         Pageable page = PageRequest.of(pageNum, limit, Sort.by(SORTING_BY_ID));
         Specification<CardEntity> spec = Specification.<CardEntity>unrestricted()
-                .and(CardSpecification.hasHolder(holder));
+                .and(cardSpecification.hasHolder(holder));
 
         var entities = cardRepo.findAll(spec, page);
 
@@ -81,6 +83,7 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Transactional
     public CardResponse updateCard(int id, CardUpdateRequest request) {
         var entity = cardRepo.findById(id)
                 .orElseThrow(() -> new CardNotFoundException(CARD_NOT_FOUND_ERROR));
@@ -92,10 +95,11 @@ public class CardServiceImpl implements CardService {
     }
 
     @Override
+    @Transactional
     public void changeStatus(int id, boolean status) {
         cardRepo.findById(id)
                 .orElseThrow(() -> new CardNotFoundException(CARD_NOT_FOUND_ERROR));
 
-        cardRepo.updateStatusById(id);
+        cardRepo.updateStatusById(id, status);
     }
 }

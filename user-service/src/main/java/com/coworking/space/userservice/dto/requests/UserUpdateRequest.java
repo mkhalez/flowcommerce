@@ -7,5 +7,5 @@ import java.time.LocalDate;
 
 public record UserUpdateRequest(String name,
                                 String surname,
-                                @Past LocalDate birthDate,
+                                @Past LocalDate birthDay,
                                 @Email String email) {}

@@ -19,6 +19,7 @@ public interface CardMapper {
 
     @Mapping(target = "active", constant = "true")
     @Mapping(target = "user", source = "user")
+    @Mapping(target = "id", ignore = true)
     CardEntity toCardEntity(CardCreateRequest request, UserEntity user);
 
     void updateCardEntity(CardUpdateRequest request, @MappingTarget CardEntity entity);

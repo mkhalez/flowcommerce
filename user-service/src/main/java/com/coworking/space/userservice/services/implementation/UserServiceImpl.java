@@ -29,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
     private final CardRepository cardRepo;
     private final UserMapper userMapper;
+    private final UserSpecification userSpecification;
 
     private static final int ZERO_CARD = 0;
     private static final String SORTING_BY_ID = "id";
@@ -55,8 +56,8 @@ public class UserServiceImpl implements UserService {
     public Page<UserResponse> findAll(int limit, int pageNum, String name, String surname) {
         Pageable page = PageRequest.of(pageNum, limit, Sort.by(SORTING_BY_ID));
         Specification<UserEntity> spec = Specification.<UserEntity>unrestricted()
-                .and(UserSpecification.hasName(name))
-                .and(UserSpecification.hasSurname(surname));
+                .and(userSpecification.hasName(name))
+                .and(userSpecification.hasSurname(surname));
 
         var entities = userRepo.findAll(spec, page);
 
@@ -89,9 +90,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void changeStatus(int id, boolean status) {
         userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
 
         userRepo.updateStatusById(id, status);
+
+        if(!status) {
+            cardRepo.updateAllStatusById(id, status);
+        }
     }
 }

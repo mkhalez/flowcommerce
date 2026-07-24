@@ -6,5 +6,5 @@ CREATE TABLE users(
     surname text NOT NULL,
     birth_date DATE NOT NULL,
     email text UNIQUE NOT NULL ,
-    active bool
+    active bool NOT NULL
 );
