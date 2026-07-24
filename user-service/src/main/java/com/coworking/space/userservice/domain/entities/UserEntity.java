@@ -1,19 +1,21 @@
 package com.coworking.space.userservice.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@Getter
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<PaymentCardEntity> cards;
+    private List<CardEntity> cards;
 
     private String name;
 

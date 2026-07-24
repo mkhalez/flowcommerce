@@ -1,4 +1,4 @@
-package com.coworking.space.userservice.repositories.util;
+package com.coworking.space.userservice.repositories.specification;
 
 import com.coworking.space.userservice.domain.entities.UserEntity;
 import org.springframework.data.jpa.domain.Specification;

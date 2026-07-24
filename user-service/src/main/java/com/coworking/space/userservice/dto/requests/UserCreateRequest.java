@@ -10,5 +10,5 @@ import java.time.LocalDate;
 public record UserCreateRequest(
     @NotBlank String name,
     @NotBlank String surname,
-    @NotNull @Past LocalDate birthDate,
+    @NotNull @Past LocalDate birthDay,
     @Email String email) {}

@@ -4,5 +4,5 @@ import java.time.LocalDate;
 
 public record UserResponse(
         int id, String name, String surname,
-        LocalDate birthDate, String email,
-        boolean active) {}
+        LocalDate birthDay, String email,
+        int cardsCount, boolean active) {}

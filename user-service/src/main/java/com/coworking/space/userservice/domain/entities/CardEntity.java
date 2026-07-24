@@ -1,15 +1,17 @@
 package com.coworking.space.userservice.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "payment_cards")
-public class PaymentCardEntity {
+@Getter
+public class CardEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
