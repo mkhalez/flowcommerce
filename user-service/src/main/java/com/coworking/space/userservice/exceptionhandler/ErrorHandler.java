@@ -19,13 +19,18 @@ public class ErrorHandler {
     private static final String PAYMENT_CARDS_NUMBER_KEY = "payment_cards_number_key";
     private static final String USERS_EMAIL_KEY = "users_email_key";
 
+    @ExceptionHandler(ExceededLimitException.class)
+    public ResponseEntity<ErrorResponse> handleExceededLimitException(Exception e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
     @ExceptionHandler({
             CardNotFoundException.class,
-            ExceededLimitException.class,
             UserNotFoundException.class
     })
-    public ResponseEntity<ErrorResponse> handleBusinessLogicException(Exception e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(Exception e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
