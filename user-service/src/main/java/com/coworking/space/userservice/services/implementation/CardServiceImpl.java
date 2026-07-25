@@ -14,6 +14,7 @@ import com.coworking.space.userservice.repositories.specification.CardSpecificat
 import com.coworking.space.userservice.services.CardService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class CardServiceImpl implements CardService {
     private static final String SORTING_BY_ID = "id";
 
     @Override
+    @CacheEvict(value = "user", key = "#request.userId()")
     public CardResponse createCard(CardCreateRequest request) {
         var userEntity = userRepo.findById(request.userId())
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));

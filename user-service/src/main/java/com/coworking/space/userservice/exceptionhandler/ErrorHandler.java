@@ -3,6 +3,7 @@ package com.coworking.space.userservice.exceptionhandler;
 import com.coworking.space.userservice.exception.CardNotFoundException;
 import com.coworking.space.userservice.exception.ExceededLimitException;
 import com.coworking.space.userservice.exception.UserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import com.coworking.space.userservice.dto.responses.ErrorResponse;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @RestControllerAdvice
+@Slf4j
 public class ErrorHandler {
     private static final String CARD_ALREADY_EXIST = "card with this number already exists";
     private static final String USER_WITH_EMAIL_ALREADY_EXIST = "user with this email already exists";
@@ -21,6 +23,8 @@ public class ErrorHandler {
 
     @ExceptionHandler(ExceededLimitException.class)
     public ResponseEntity<ErrorResponse> handleExceededLimitException(Exception e) {
+        log.atError().setCause(e).log();
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
     }
@@ -30,12 +34,15 @@ public class ErrorHandler {
             UserNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(Exception e) {
+        log.atError().setCause(e).log();
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.atError().setCause(e).log();
+
         String rootErrorMessage = e.getMessage();
         String errorMessage = e.getMostSpecificCause().getMessage();
 
@@ -49,10 +56,9 @@ public class ErrorHandler {
                 .body(new ErrorResponse(errorMessage));
     }
 
-    @ExceptionHandler({
-
-    })
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(Exception e) {
+        log.atError().setCause(e).log();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
     }

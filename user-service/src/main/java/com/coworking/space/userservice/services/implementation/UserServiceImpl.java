@@ -13,6 +13,8 @@ import com.coworking.space.userservice.repositories.specification.UserSpecificat
 import com.coworking.space.userservice.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +46,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "user", key = "#id", sync = true)
     public UserResponse getUserById(int id) {
         var entity = userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
@@ -78,6 +81,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "user", key = "#id")
     public UserResponse updateUser(int id, UserUpdateRequest request) {
         var entity = userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
@@ -91,6 +95,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "user", key = "#id")
     public void changeStatus(int id, boolean status) {
         userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
 
