@@ -22,15 +22,6 @@ jobs:
       - name: test
         run: mvn -B verify
 
-      - name: analyze
-        uses: philips-software/sonar-scanner-action@v1.5.1
-        with:
-          token: ${{ secrets.SONARQUBE_TOKEN }}
-          projectName: user-service
-          projectKey: com.flowcommerce_user-service
-          url: https://sonarcloud.io
-          organization: com-flowcommerce
-
 
   docker:
     needs: build-test-analyze
