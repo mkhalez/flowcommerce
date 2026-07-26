@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/${POSTGRES_DOCKER_DB}
+    username: ${POSTGRES_DOCKER_USER}
+    password: ${POSTGRES_DOCKER_PASSWORD}
+  data:
+    redis:
+      host: redis
+      port: 6379
+      timeout: 60000
+      password: ${REDIS_DOCKER_PASSWORD}
