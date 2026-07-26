@@ -23,13 +23,13 @@ jobs:
         run: mvn -B verify
 
       - name: analyze
-        uses: philips-software/sonar-scanner-action@1.5.1
+        uses: philips-software/sonar-scanner-action@v1.5.1
         with:
           token: ${{ secrets.SONARQUBE_TOKEN }}
           projectName: user-service
-          projectKey: com.flowcommerce:user-service
-          url: https://your.sonar.instance.io/
-          isCommunityEdition: true
+          projectKey: com.flowcommerce_user-service
+          url: https://sonarcloud.io
+          organization: com-flowcommerce
 
 
   docker:
