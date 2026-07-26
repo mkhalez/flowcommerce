@@ -105,4 +105,17 @@ public class UserServiceImpl implements UserService {
             cardRepo.updateAllStatusById(id, status);
         }
     }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "user", key = "#id")
+    public void deleteById(int id) {
+        if (!userRepo.existsById(id)) {
+            throw new UserNotFoundException(USER_NOT_FOUND_ERROR);
+        }
+
+        cardRepo.deleteByUserId(id);
+
+        userRepo.deleteById(id);
+    }
 }

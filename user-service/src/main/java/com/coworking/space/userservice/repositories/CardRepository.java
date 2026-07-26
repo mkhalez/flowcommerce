@@ -55,4 +55,8 @@ public interface CardRepository extends JpaRepository<CardEntity, Integer>, JpaS
             """,
             nativeQuery = true)
     void updateAllStatusById(@Param("user_id") int userId, @Param("status") boolean status);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM CardEntity c WHERE c.user.id = :userId")
+    void deleteByUserId(@Param("userId") int userId);
 }

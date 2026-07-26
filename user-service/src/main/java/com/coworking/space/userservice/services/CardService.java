@@ -21,4 +21,6 @@ public interface CardService {
     CardResponse updateCard(int id, CardUpdateRequest request);
 
     void changeStatus(int id, boolean status);
+
+    void deleteById(int id);
 }

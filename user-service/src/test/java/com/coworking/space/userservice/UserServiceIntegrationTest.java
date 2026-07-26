@@ -284,4 +284,52 @@ public class UserServiceIntegrationTest {
 
 
     }
+
+
+    @Test
+    void deleteUserTest() throws Exception {
+        ErrorResponse expectErrorResponseByUser = new ErrorResponse("user not found");
+        ErrorResponse expectErrorResponseByCard = new ErrorResponse("card not found");
+
+        UserCreateRequest requestToCreate = new UserCreateRequest(
+                "Pasha",
+                "Ivanov",
+                LocalDate.of(1995, 6, 15),
+                "ivanov@mail.ru"
+        );
+
+
+
+        String response = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(requestToCreate)))
+                .andReturn().getResponse().getContentAsString();
+
+        UserResponse user = mapper.readValue(response, UserResponse.class);
+
+        CardCreateRequest cardCreateRequest = new CardCreateRequest(
+                user.id(),
+                "1234167812341651",
+                "PASHA IVANOV",
+                LocalDate.of(2028, 2, 1)
+        );
+
+        String cardJsonResponse = mockMvc.perform(post(CARD_ROUTE).contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(cardCreateRequest)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        CardResponse actualCardResponse = mapper.readValue(cardJsonResponse, CardResponse.class);
+
+
+        mockMvc.perform(delete(USER_ROUTE + "/" + user.id()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get(USER_ROUTE + "/" + user.id()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(mapper.writeValueAsString(expectErrorResponseByUser)));
+
+        mockMvc.perform(get(CARD_ROUTE + "/" + actualCardResponse.id()))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(mapper.writeValueAsString(expectErrorResponseByCard)));
+    }
 }

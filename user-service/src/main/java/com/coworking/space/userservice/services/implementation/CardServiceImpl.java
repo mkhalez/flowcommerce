@@ -104,4 +104,14 @@ public class CardServiceImpl implements CardService {
 
         cardRepo.updateStatusById(id, status);
     }
+
+    @Override
+    @CacheEvict(value = "user", key = "#id")
+    public void deleteById(int id) {
+        if (!cardRepo.existsById(id)) {
+            throw new CardNotFoundException(CARD_NOT_FOUND_ERROR);
+        }
+
+        cardRepo.deleteById(id);
+    }
 }

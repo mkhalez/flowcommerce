@@ -18,4 +18,6 @@ public interface UserService {
     UserResponse updateUser(int id, UserUpdateRequest request);
 
     void changeStatus(int id, boolean status);
+
+    void deleteById(int id);
 }

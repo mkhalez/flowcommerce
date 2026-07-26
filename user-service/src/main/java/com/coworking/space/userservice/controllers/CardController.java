@@ -63,4 +63,10 @@ public class CardController {
     public void deactivateCard(@PathVariable int id) {
         cardService.changeStatus(id, false);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCard(@PathVariable int id) {
+        cardService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -492,4 +492,43 @@ public class CardServiceIntegrationTest {
 
         Assertions.assertEquals(expectCardResponse, getCardResponseById);
     }
+
+    @Test
+    void deleteCardTest() throws Exception {
+        ErrorResponse expectErrorResponse = new ErrorResponse("card not found");
+        UserCreateRequest userRequest = new UserCreateRequest(
+                "Pasha",
+                "Ivanov",
+                LocalDate.of(1995, 6, 15),
+                "ivanov@mail.ru"
+        );
+        String responseJson = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userRequest)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        UserResponse user = mapper.readValue(responseJson, UserResponse.class);
+
+        CardCreateRequest cardCreateRequest = new CardCreateRequest(
+                user.id(),
+                "1234167812341651",
+                "PASHA IVANOV",
+                LocalDate.of(2028, 2, 1)
+        );
+
+        String cardJsonResponse = mockMvc.perform(post(CARD_ROUTE).contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(cardCreateRequest)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        CardResponse actualCardResponse = mapper.readValue(cardJsonResponse, CardResponse.class);
+
+        mockMvc.perform(delete(CARD_ROUTE + "/" + actualCardResponse.id()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(delete(CARD_ROUTE + "/" + actualCardResponse.id()))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(mapper.writeValueAsString(expectErrorResponse)));
+
+    }
 }
