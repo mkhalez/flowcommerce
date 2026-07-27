@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: user-service-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DOCKER_DB}
+      POSTGRES_USER: ${POSTGRES_DOCKER_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_DOCKER_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_DOCKER_USER} -d ${POSTGRES_DOCKER_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  liquibase:
+    image: liquibase/liquibase:4.29
+    container_name: liquibase_user_service_runner
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./user-service/migrations:/liquibase/changelog
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DOCKER_DB}
+      LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_DOCKER_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_DOCKER_PASSWORD}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/changelog.xml
+    command: ["update"]
+    networks:
+      - backend
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: user-service-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_DOCKER_PASSWORD} --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_DOCKER_PASSWORD}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  user-service:
+    image: mkhalez/user-service:0.1
+    container_name: user-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      liquibase:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DOCKER_DB: ${POSTGRES_DOCKER_DB}
+      POSTGRES_DOCKER_USER: ${POSTGRES_DOCKER_USER}
+      POSTGRES_DOCKER_PASSWORD: ${POSTGRES_DOCKER_PASSWORD}
+      REDIS_DOCKER_PASSWORD: ${REDIS_DOCKER_PASSWORD}
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
