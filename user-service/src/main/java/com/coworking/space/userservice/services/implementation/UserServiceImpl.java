@@ -13,6 +13,7 @@ import com.coworking.space.userservice.repositories.specification.UserSpecificat
 import com.coworking.space.userservice.services.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepo;
     private final CardRepository cardRepo;
@@ -42,6 +44,8 @@ public class UserServiceImpl implements UserService {
         var entity = userMapper.toUserEntity(request);
         var saved = userRepo.save(entity);
 
+        log.atInfo().addKeyValue("create user with id", saved.getId()).log();
+
         return userMapper.toUserResponse(saved, ZERO_CARD);
     }
 
@@ -51,6 +55,8 @@ public class UserServiceImpl implements UserService {
         var entity = userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
         int cardsCount = cardRepo.countByUserId(id);
+
+        log.atInfo().addKeyValue("find user with id", id).log();
 
         return userMapper.toUserResponse(entity, cardsCount);
     }
@@ -73,6 +79,10 @@ public class UserServiceImpl implements UserService {
                 : cardRepo.getUserCardsCount(ids).stream()
                     .collect(Collectors.toMap(UserCardsCount::getUserId, UserCardsCount::getCount));
 
+        log.atInfo()
+                .addKeyValue("find users with name", name)
+                .addKeyValue("find users with surname", surname)
+                .log();
 
         return entities.map(entity -> {
             int cardsCount = countsByUserId.getOrDefault(entity.getId(), ZERO_CARD);
@@ -90,6 +100,8 @@ public class UserServiceImpl implements UserService {
         var saved = userRepo.save(entity);
         int count = cardRepo.countByUserId(saved.getId());
 
+        log.atInfo().addKeyValue("update user with id", saved.getId()).log();
+
         return userMapper.toUserResponse(saved, count);
     }
 
@@ -101,8 +113,18 @@ public class UserServiceImpl implements UserService {
 
         userRepo.updateStatusById(id, status);
 
+        log.atInfo()
+                .addKeyValue("change user status with id", id)
+                .addKeyValue("status", status)
+                .log();
+
         if(!status) {
             cardRepo.updateAllStatusById(id, status);
+
+            log.atInfo()
+                    .addKeyValue("change cards status with userId", id)
+                    .addKeyValue("status", status)
+                    .log();
         }
     }
 
@@ -115,7 +137,9 @@ public class UserServiceImpl implements UserService {
         }
 
         cardRepo.deleteByUserId(id);
+        log.atInfo().addKeyValue("delete card with userId", id).log();
 
         userRepo.deleteById(id);
+        log.atInfo().addKeyValue("delete user with id", id).log();
     }
 }

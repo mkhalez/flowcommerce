@@ -34,4 +34,7 @@ build/
 
 user-service/.env
 .env
+.mvn
+user-service/.mvn
+user-service/mvnw.cmd
 

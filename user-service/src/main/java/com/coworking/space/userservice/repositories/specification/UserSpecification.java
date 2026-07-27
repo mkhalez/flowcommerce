@@ -2,9 +2,10 @@ package com.coworking.space.userservice.repositories.specification;
 
 import com.coworking.space.userservice.domain.entities.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Service
+@Component
 public class UserSpecification {
     private static final String NAME_ATTRIBUTE = "name";
     private static final String SURNAME_ATTRIBUTE = "surname";

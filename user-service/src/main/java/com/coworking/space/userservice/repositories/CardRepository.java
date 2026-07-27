@@ -11,8 +11,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
-
+@Repository
 public interface CardRepository extends JpaRepository<CardEntity, Integer>, JpaSpecificationExecutor<CardEntity> {
     Optional<CardEntity> findById(int id);
 

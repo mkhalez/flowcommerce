@@ -6,5 +6,7 @@ CREATE TABLE payment_cards(
     number text NOT NULL UNIQUE,
     holder text NOT NULL ,
     expiration_date DATE NOT NULL ,
-    active bool NOT NULL
+    active bool NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    last_modified_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
