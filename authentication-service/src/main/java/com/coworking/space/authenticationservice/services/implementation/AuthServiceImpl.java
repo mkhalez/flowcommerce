@@ -62,10 +62,11 @@ public class AuthServiceImpl implements AuthService {
         var roleEntity = roleRepo.findByName(USER_ROLE_NAME)
                 .orElseThrow(() -> new RoleNotFoundException(ROLE_NOT_FOUND));
 
-        var userEntity = new UserEntity();
-        userEntity.setUsername(userRequest.getUsername());
-        userEntity.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        userEntity.getRoles().add(roleEntity);
+        var userEntity = UserEntity.builder()
+                .username(userRequest.getUsername())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .roles(Set.of(roleEntity))
+                .build();
 
         var saved = userRepo.save(userEntity);
 
