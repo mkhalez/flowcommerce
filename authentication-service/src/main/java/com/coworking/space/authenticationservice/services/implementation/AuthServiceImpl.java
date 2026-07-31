@@ -80,6 +80,12 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
+        log.atInfo().addKeyValue("event", "registration")
+                .addKeyValue("username", userRequest.getUsername())
+                .addKeyValue("accessToken", accessToken)
+                .addKeyValue("refreshToken", refreshToken)
+                .log();
+
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -100,6 +106,12 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtService.generateAccessToken(userDetails.getUsername(), roles, userDetails.getId());
         String refreshToken = jwtService.generateRefreshToken(authentication.getName());
+
+        log.atInfo().addKeyValue("event", "authentication")
+                .addKeyValue("username", userRequest.getUsername())
+                .addKeyValue("accessToken", accessToken)
+                .addKeyValue("refreshToken", refreshToken)
+                .log();
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -136,6 +148,12 @@ public class AuthServiceImpl implements AuthService {
 
         String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
+
+        log.atInfo().addKeyValue("event", "refresh token")
+                .addKeyValue("username", user.getUsername())
+                .addKeyValue("accessToken", accessToken)
+                .addKeyValue("refreshToken", refreshToken)
+                .log();
 
         return AuthResponse.builder()
                 .accessToken(accessToken)

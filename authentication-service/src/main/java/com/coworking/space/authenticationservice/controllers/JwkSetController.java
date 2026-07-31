@@ -17,7 +17,7 @@ public class JwkSetController {
     private final RsaKeyProperties rsaKeys;
 
     @GetMapping("/.well-known/jwks.json")
-    public Map<String, Object> hello() {
+    public Map<String, Object> jwks() {
         RSAKey jwk = new RSAKey.Builder(rsaKeys.getPublicKey())
                 .keyID(rsaKeys.getKid())
                 .keyUse(KeyUse.SIGNATURE)

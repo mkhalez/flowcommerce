@@ -7,6 +7,7 @@ import com.coworking.space.authenticationservice.repositories.RoleRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class InitializerSecurityInfo implements CommandLineRunner {
     private final UserRepository userRepo;
     private final RoleRepository roleRepo;
@@ -52,5 +54,10 @@ public class InitializerSecurityInfo implements CommandLineRunner {
                                                     .build();
             userRepo.save(adminEntity);
         }
+
+        log.atInfo()
+                .addKeyValue("event", "auth bd initialization")
+                .log();
+
     }
 }

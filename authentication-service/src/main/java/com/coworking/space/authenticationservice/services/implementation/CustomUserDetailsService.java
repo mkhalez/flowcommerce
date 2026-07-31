@@ -5,6 +5,7 @@ import com.coworking.space.authenticationservice.domain.entities.UserEntity;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import com.coworking.space.authenticationservice.utils.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.User;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepo;
 
@@ -28,6 +30,11 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(RoleEntity::getName)
                 .map(SimpleGrantedAuthority::new)
                 .toList();
+
+        log.atInfo()
+                .addKeyValue("event", "loadUserByUsername")
+                .addKeyValue("username", username)
+                .log();
 
         return CustomUserDetails.builder()
                 .id(entity.getId())
