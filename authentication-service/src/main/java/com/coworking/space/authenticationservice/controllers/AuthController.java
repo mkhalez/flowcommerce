@@ -1,27 +1,45 @@
 package com.coworking.space.authenticationservice.controllers;
 
-import com.coworking.space.authenticationservice.dto.request.UserRequest;
+import com.coworking.space.authenticationservice.dto.request.LoginRequest;
+import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
+import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.AuthResponse;
-import com.coworking.space.authenticationservice.services.UserService;
+import com.coworking.space.authenticationservice.services.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final UserService userService;
+    private final AuthService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> register(UserRequest user) {
-        var response = userService.register(user);
+    public ResponseEntity<AuthResponse> register(@RequestBody SingUpRequest userRequest) {
+        var response = userService.register(userRequest);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest userRequest) {
+        var response = userService.authenticate(userRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> accessToken(@RequestBody RefreshRequest refreshRequest) {
+        var response = userService.accessToken(refreshRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(response);
     }
 }

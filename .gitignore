@@ -41,4 +41,5 @@ user-service/.env
 authentication-service/.mvn
 authentication-service/mvnw.cmd
 authentication-service/.env
+authentication-service/src/main/resources/certs/
 

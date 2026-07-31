@@ -1,10 +1,15 @@
 package com.coworking.space.authenticationservice.services;
 
 
+import com.coworking.space.authenticationservice.domain.models.Role;
 import com.coworking.space.authenticationservice.domain.models.User;
 
-public interface JwtService {
-    String generateRefreshToken(User user);
+import java.time.Instant;
+import java.util.Set;
 
-    String generateAccessToken(User user);
+public interface JwtService {
+    String generateAccessToken(String  username, Set<Role> roles);
+
+    String generateRefreshToken(String  username);
+
 }

@@ -1,3 +1,30 @@
 spring:
+  config:
+    import: optional:file:authentication-service/.env[.properties]
+  datasource:
+    url: jdbc:postgresql://localhost:5433/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   application:
     name: authentication-service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        default_batch_fetch_size: 50
+        format_sql: true
+
+server:
+  port: 8081
+
+security:
+  keys:
+    public-key: classpath:certs/public_key.pem
+    private-key: classpath:certs/private_key.pem
+    kid: auth-service-0
+
+  issuer: auth-service
+  access-token-minutes: 10
+  refresh-token-minutes: 60
