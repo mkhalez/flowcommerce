@@ -12,5 +12,6 @@ import java.util.Set;
 public interface UserMapper {
 
     @Mapping(target = "roles", source = "roles")
+    @Mapping(target = "id", source = "userEntity.id")
     User toUser(UserEntity userEntity, Set<Role> roles);
 }

@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.Set;
 
 public interface JwtService {
-    String generateAccessToken(String  username, Set<Role> roles);
+    String generateAccessToken(String  username, Set<Role> roles, int userId);
 
     String generateRefreshToken(String  username);
 

@@ -23,18 +23,24 @@ public class JwtServiceImpl implements JwtService {
     private static final String REFRESH_CLAIM_TYPE = "refresh";
     private static final String ACCESS_CLAIM_TYPE = "access";
     private static final String TOKEN_TYPE_NAME = "type";
+    private static final String USER_ID_NAME = "userId";
 
     @Override
-    public String generateAccessToken(String  username, Set<Role> roles) {
+    public String generateAccessToken(String  username, Set<Role> roles, int userId) {
         Instant now = Instant.now();
+
+        var claimRoles = roles.stream()
+                .map(Role::getName)
+                .toList();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(ISSUER)
                 .issuedAt(now)
-                .expiresAt(now.plus(authSecurityProperties.getAccessTokenMinutes(), ChronoUnit.HOURS))
+                .expiresAt(now.plus(authSecurityProperties.getAccessTokenMinutes(), ChronoUnit.MINUTES))
                 .subject(username)
-                .claim(ROLES_CLAIM_NAME, roles)
+                .claim(ROLES_CLAIM_NAME, claimRoles)
                 .claim(TOKEN_TYPE_NAME, ACCESS_CLAIM_TYPE)
+                .claim(USER_ID_NAME, userId)
                 .build();
 
         var encoderParameters = JwtEncoderParameters.from(JwsHeader.with(SignatureAlgorithm.RS256).build(), claims);

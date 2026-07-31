@@ -40,8 +40,8 @@ public class UserServiceImpl implements UserService {
     private static final String USER_NOT_FOUND_ERROR = "user not found";
 
     @Override
-    public UserResponse createUser(UserCreateRequest request) {
-        var entity = userMapper.toUserEntity(request);
+    public UserResponse createUser(UserCreateRequest request, String authUserId) {
+        var entity = userMapper.toUserEntity(request, authUserId);
         var saved = userRepo.save(entity);
 
         log.atInfo().addKeyValue("create user with id", saved.getId()).log();

@@ -14,6 +14,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,10 +28,12 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
     private final RsaKeyProperties rsaKeys;
 
     private static final String AUTH_ROUTE_PATTERN = "/auth/**";
+    private static final String PUBLIC_KEY_ROUTE = "/.well-known/jwks.json";
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,7 +60,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(AUTH_ROUTE_PATTERN).permitAll();
+                    auth.requestMatchers(AUTH_ROUTE_PATTERN, PUBLIC_KEY_ROUTE).permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session ->

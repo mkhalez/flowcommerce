@@ -16,9 +16,11 @@ import com.coworking.space.authenticationservice.repositories.RoleRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import com.coworking.space.authenticationservice.services.JwtService;
 import com.coworking.space.authenticationservice.services.AuthService;
+import com.coworking.space.authenticationservice.utils.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.CachingUserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -75,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
                 .collect(Collectors.toSet());
         User user = userMapper.toUser(saved, roles);
 
-        String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles());
+        String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
         return AuthResponse.builder()
@@ -89,12 +91,14 @@ public class AuthServiceImpl implements AuthService {
         var token = new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(token);
 
-        var roles = authentication.getAuthorities().stream()
+        var userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        var roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(Role::new)
                 .collect(Collectors.toSet());
 
-        String accessToken = jwtService.generateAccessToken(authentication.getName(), roles);
+        String accessToken = jwtService.generateAccessToken(userDetails.getUsername(), roles, userDetails.getId());
         String refreshToken = jwtService.generateRefreshToken(authentication.getName());
 
         return AuthResponse.builder()
@@ -130,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
                 .collect(Collectors.toSet());
         User user = userMapper.toUser(entity, roles);
 
-        String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles());
+        String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
         String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
         return AuthResponse.builder()
