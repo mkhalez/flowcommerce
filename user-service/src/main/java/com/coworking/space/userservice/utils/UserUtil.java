@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class UserUtil {
     private final UserRepository userRepo;
 
-    private static final String USER_NOT_FOUND_ERROR = "user not found by id";
+    private static final String USER_NOT_FOUND_ERROR = "user not found";
 
     public String getAuthIdByUserId(int userId) {
         var entity = userRepo.findById(userId)

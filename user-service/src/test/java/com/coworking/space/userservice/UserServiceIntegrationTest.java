@@ -14,7 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import tools.jackson.core.type.TypeReference;
@@ -24,6 +27,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,6 +42,9 @@ public class UserServiceIntegrationTest {
     private static final String CLEAN_USER_TABLE = "DELETE FROM users";
     private static final String CARD_ROUTE = "/api/cards";
     private static final String CLEAN_CARD_TABLE = "DELETE FROM payment_cards";
+
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -63,9 +70,12 @@ public class UserServiceIntegrationTest {
                 "ivanov@mail.ru"
         );
 
-
-
-        String responseJson = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String responseJson = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
@@ -87,7 +97,12 @@ public class UserServiceIntegrationTest {
                 "ivanov@mail.ru"
         );
 
-        String response = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate)))
                 .andReturn().getResponse().getContentAsString();
 
@@ -99,7 +114,12 @@ public class UserServiceIntegrationTest {
 
 
 
-        mockMvc.perform(get(USER_ROUTE + "/" + id).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(USER_ROUTE + "/" + id)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(responseById)));
     }
@@ -109,7 +129,12 @@ public class UserServiceIntegrationTest {
         ErrorResponse expect = new ErrorResponse("user not found");
         int id = 10;
 
-        mockMvc.perform(get(USER_ROUTE + "/" + id).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(USER_ROUTE + "/" + id)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
@@ -122,7 +147,12 @@ public class UserServiceIntegrationTest {
                 LocalDate.of(1995, 6, 15),
                 "pasha@mail.ru"
         );
-        String response1 = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String response1 = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate1)))
                 .andReturn().getResponse().getContentAsString();
         int id1 = mapper.readValue(response1, UserResponse.class).id();
@@ -137,7 +167,12 @@ public class UserServiceIntegrationTest {
                 LocalDate.of(1995, 6, 15),
                 "sasha@mail.ru"
         );
-        String response = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate2)))
                 .andReturn().getResponse().getContentAsString();
         int id2 = mapper.readValue(response, UserResponse.class).id();
@@ -154,13 +189,22 @@ public class UserServiceIntegrationTest {
                 "Lopuhov@mail.ru"
         );
 
-        mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(USER_ROUTE)
+                .with(jwt().jwt(builder -> builder
+                                .claim("userId", 1)
+                                .claim("type", "access"))
+                        .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate3)));
 
         String pageJsonResponse = mockMvc.perform(get(USER_ROUTE)
                         .param("limit", "5")
                         .param("page", "0")
-                        .param("surname", "Ivanov"))
+                        .param("surname", "Ivanov")
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -192,7 +236,12 @@ public class UserServiceIntegrationTest {
                 "pasha228@gmail.com"
         );
 
-        String response = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate)))
                 .andReturn().getResponse().getContentAsString();
 
@@ -203,10 +252,20 @@ public class UserServiceIntegrationTest {
                 "pasha228@gmail.com", 0, true
         );
 
-        mockMvc.perform(patch(USER_ROUTE + "/" + id).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(patch(USER_ROUTE + "/" + id)
+                .with(jwt().jwt(builder -> builder
+                                .claim("userId", 1)
+                                .claim("type", "access"))
+                        .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsBytes(requestToUpdate)));
 
-        mockMvc.perform(get(USER_ROUTE + "/" + id).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(USER_ROUTE + "/" + id)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(responseById)));
     }
@@ -220,7 +279,12 @@ public class UserServiceIntegrationTest {
                 "ivanov@mail.ru"
         );
 
-        String response = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate)))
                 .andReturn().getResponse().getContentAsString();
 
@@ -253,19 +317,44 @@ public class UserServiceIntegrationTest {
         );
 
 
-        mockMvc.perform(post(CARD_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(CARD_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(cardCreateRequest1)))
                 .andExpect(status().isCreated());
-        mockMvc.perform(post(CARD_ROUTE).contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(post(CARD_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(cardCreateRequest2)))
                 .andExpect(status().isCreated());
-        mockMvc.perform(post(CARD_ROUTE).contentType(MediaType.APPLICATION_JSON)
+
+        mockMvc.perform(post(CARD_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(cardCreateRequest3)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(patch(USER_ROUTE + "/" + id + "/deactivate"));
+        mockMvc.perform(patch(USER_ROUTE + "/" + id + "/deactivate")
+                .with(jwt().jwt(builder -> builder
+                                .claim("userId", 1)
+                                .claim("type", "access"))
+                        .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))));
 
-        String cardsJson = mockMvc.perform(get(CARD_ROUTE + "/by-user/" + id))
+        String cardsJson = mockMvc.perform(get(CARD_ROUTE + "/by-user/" + id)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -274,7 +363,12 @@ public class UserServiceIntegrationTest {
                 new TypeReference<List<CardResponse>>() {}
         );
 
-        mockMvc.perform(get(USER_ROUTE + "/" + id).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(USER_ROUTE + "/" + id)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(responseById)));
 
@@ -300,7 +394,12 @@ public class UserServiceIntegrationTest {
 
 
 
-        String response = mockMvc.perform(post(USER_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String response = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(requestToCreate)))
                 .andReturn().getResponse().getContentAsString();
 
@@ -313,7 +412,12 @@ public class UserServiceIntegrationTest {
                 LocalDate.of(2028, 2, 1)
         );
 
-        String cardJsonResponse = mockMvc.perform(post(CARD_ROUTE).contentType(MediaType.APPLICATION_JSON)
+        String cardJsonResponse = mockMvc.perform(post(CARD_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(cardCreateRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
@@ -321,15 +425,82 @@ public class UserServiceIntegrationTest {
         CardResponse actualCardResponse = mapper.readValue(cardJsonResponse, CardResponse.class);
 
 
-        mockMvc.perform(delete(USER_ROUTE + "/" + user.id()))
+        mockMvc.perform(delete(USER_ROUTE + "/" + user.id())
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get(USER_ROUTE + "/" + user.id()).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(USER_ROUTE + "/" + user.id())
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(mapper.writeValueAsString(expectErrorResponseByUser)));
 
-        mockMvc.perform(get(CARD_ROUTE + "/" + actualCardResponse.id()))
+        mockMvc.perform(get(CARD_ROUTE + "/" + actualCardResponse.id())
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(mapper.writeValueAsString(expectErrorResponseByCard)));
+    }
+
+    @Test
+    void userTryToDeleteUserTest() throws Exception {
+        ErrorResponse expectErrorResponseByUser = new ErrorResponse("user not found");
+        ErrorResponse expectErrorResponseByCard = new ErrorResponse("card not found");
+
+        UserCreateRequest requestToCreate = new UserCreateRequest(
+                "Pasha",
+                "Ivanov",
+                LocalDate.of(1995, 6, 15),
+                "ivanov@mail.ru"
+        );
+
+
+
+        String response = mockMvc.perform(post(USER_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(requestToCreate)))
+                .andReturn().getResponse().getContentAsString();
+
+        UserResponse user = mapper.readValue(response, UserResponse.class);
+
+        CardCreateRequest cardCreateRequest = new CardCreateRequest(
+                user.id(),
+                "1234167812341651",
+                "PASHA IVANOV",
+                LocalDate.of(2028, 2, 1)
+        );
+
+        String cardJsonResponse = mockMvc.perform(post(CARD_ROUTE)
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(cardCreateRequest)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        CardResponse actualCardResponse = mapper.readValue(cardJsonResponse, CardResponse.class);
+
+
+        mockMvc.perform(delete(USER_ROUTE + "/" + user.id())
+                        .with(jwt().jwt(builder -> builder
+                                        .claim("userId", 1)
+                                        .claim("type", "access"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_USER"))))
+                .andExpect(status().isForbidden());
+
     }
 }

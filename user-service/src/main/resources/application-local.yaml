@@ -16,9 +16,3 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8081/.well-known/jwks.json
-
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG
