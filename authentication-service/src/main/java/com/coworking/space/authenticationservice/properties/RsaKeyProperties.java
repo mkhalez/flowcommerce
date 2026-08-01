@@ -14,7 +14,6 @@ import java.security.interfaces.RSAPublicKey;
 @AllArgsConstructor
 @Getter
 @Setter
-@Profile("!test")
 public class RsaKeyProperties {
     private RSAPublicKey publicKey;
 

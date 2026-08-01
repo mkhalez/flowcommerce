@@ -5,6 +5,7 @@ import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.AuthResponse;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +15,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +41,7 @@ public class AuthControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @AfterEach
     void clean() {
         userRepository.deleteAll();
     }
