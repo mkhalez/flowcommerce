@@ -4,9 +4,9 @@ spring:
 
 security:
   keys:
-    private-key: null
-    public-key: null
-    kid: "test-key-id"
+    public-key: classpath:certs/public_key_test.pem
+    private-key: classpath:certs/private_key_test.pem
+    kid: auth-service-0-test
   initial:
     admin-password: admin-test
     admin-username: password-test
