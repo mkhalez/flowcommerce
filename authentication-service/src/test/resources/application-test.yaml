@@ -1,3 +1,11 @@
 spring:
   liquibase:
     change-log: file:migrations/changelog.xml
+
+security:
+  initial:
+    admin-password: admin-test
+    admin-username: password-test
+    roles:
+      - admin
+      - user
