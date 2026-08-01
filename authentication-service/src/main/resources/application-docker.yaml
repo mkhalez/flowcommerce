@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://auth-postgres:5432/${POSTGRES_DOCKER_DB}
+    username: ${POSTGRES_DOCKER_USER}
+    password: ${POSTGRES_DOCKER_PASSWORD}
+
+security:
+  initial:
+    admin-password: ${AUTH_ADMIN_PASSWORD}
+    admin-username: ${AUTH_ADMIN_USERNAME}
+    roles:
+      - admin
+      - user

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/${POSTGRES_DOCKER_DB}
+    url: jdbc:postgresql://user-postgres:5432/${POSTGRES_DOCKER_DB}
     username: ${POSTGRES_DOCKER_USER}
     password: ${POSTGRES_DOCKER_PASSWORD}
   data:
@@ -9,3 +9,8 @@ spring:
       port: 6379
       timeout: 60000
       password: ${REDIS_DOCKER_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service:8081/.well-known/jwks.json

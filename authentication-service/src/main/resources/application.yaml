@@ -1,10 +1,6 @@
 spring:
-  config:
-    import: optional:file:authentication-service/.env[.properties]
-  datasource:
-    url: jdbc:postgresql://localhost:5433/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+  profiles:
+    default: local
   application:
     name: authentication-service
   jpa:
@@ -28,10 +24,3 @@ security:
   issuer: auth-service
   access-token-minutes: 10
   refresh-token-minutes: 60
-
-  initial:
-    admin-password: ${ADMIN_PASSWORD}
-    admin-username: ${ADMIN_USERNAME}
-    roles:
-      - admin
-      - user
