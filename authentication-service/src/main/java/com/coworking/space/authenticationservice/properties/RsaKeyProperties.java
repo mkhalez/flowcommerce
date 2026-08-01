@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Profile;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -13,6 +14,7 @@ import java.security.interfaces.RSAPublicKey;
 @AllArgsConstructor
 @Getter
 @Setter
+@Profile("!test")
 public class RsaKeyProperties {
     private RSAPublicKey publicKey;
 
