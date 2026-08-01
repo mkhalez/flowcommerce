@@ -3,6 +3,10 @@ spring:
     change-log: file:migrations/changelog.xml
 
 security:
+  keys:
+    private-key: null
+    public-key: null
+    kid: "test-key-id"
   initial:
     admin-password: admin-test
     admin-username: password-test
