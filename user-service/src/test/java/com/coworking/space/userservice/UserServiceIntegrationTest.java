@@ -169,11 +169,11 @@ public class UserServiceIntegrationTest {
         );
         String response = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
-                                        .claim("userId", 1)
+                                        .claim("userId", 2)
                                         .claim("type", "access"))
                                 .authorities(new SimpleGrantedAuthority("ROLE_USER")))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(requestToCreate2)))
+                        .content(mapper.writeValueAsString(requestToCreate2))).andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         int id2 = mapper.readValue(response, UserResponse.class).id();
         UserResponse responseById2 = new UserResponse(
@@ -191,7 +191,7 @@ public class UserServiceIntegrationTest {
 
         mockMvc.perform(post(USER_ROUTE)
                 .with(jwt().jwt(builder -> builder
-                                .claim("userId", 1)
+                                .claim("userId", 3)
                                 .claim("type", "access"))
                         .authorities(new SimpleGrantedAuthority("ROLE_USER")))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +202,7 @@ public class UserServiceIntegrationTest {
                         .param("page", "0")
                         .param("surname", "Ivanov")
                         .with(jwt().jwt(builder -> builder
-                                        .claim("userId", 1)
+                                        .claim("userId", 4)
                                         .claim("type", "access"))
                                 .authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
                 .andExpect(status().isOk())
