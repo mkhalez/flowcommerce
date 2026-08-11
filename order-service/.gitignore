@@ -31,21 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-.env
-.mvn
-user-service/.mvn
-user-service/mvnw.cmd
-user-service/.env
-
-order-service/.mvn
-order-service/mvnw.cmd
-order-service/.env
-order-service/mvnw
-
-authentication-service/.mvn
-authentication-service/mvnw.cmd
-authentication-service/mvnw
-authentication-service/.env
-authentication-service/src/main/resources/certs/
-
