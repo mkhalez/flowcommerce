@@ -4,6 +4,7 @@ import com.coworking.space.userservice.domain.entities.UserEntity;
 import com.coworking.space.userservice.dto.requests.UserCreateRequest;
 import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
 import com.coworking.space.userservice.dto.responses.UserResponse;
+import com.coworking.space.userservice.exception.UserAlreadyExistException;
 import com.coworking.space.userservice.exception.UserNotFoundException;
 import com.coworking.space.userservice.mapper.UserMapper;
 import com.coworking.space.userservice.repositories.CardRepository;
@@ -38,10 +39,14 @@ public class UserServiceImpl implements UserService {
     private static final int ZERO_CARD = 0;
     private static final String SORTING_BY_ID = "id";
     private static final String USER_NOT_FOUND_ERROR = "user not found";
+    private static final String USER_ALREADY_EXIST = "user already exist";
 
     @Override
     public UserResponse createUser(UserCreateRequest request, String authUserId) {
         var entity = userMapper.toUserEntity(request, authUserId);
+        if(userRepo.existsByAuthUserId(authUserId)) {
+            throw new UserAlreadyExistException(USER_ALREADY_EXIST);
+        }
         var saved = userRepo.save(entity);
 
         log.atInfo().addKeyValue("create user with id", saved.getId()).log();

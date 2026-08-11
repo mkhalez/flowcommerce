@@ -2,6 +2,7 @@ package com.coworking.space.userservice.exceptionhandler;
 
 import com.coworking.space.userservice.exception.CardNotFoundException;
 import com.coworking.space.userservice.exception.ExceededLimitException;
+import com.coworking.space.userservice.exception.UserAlreadyExistException;
 import com.coworking.space.userservice.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,6 +31,13 @@ public class ErrorHandler {
         log.atError().setCause(e).log();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(UserAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleUserAlreadyExistException(UserAlreadyExistException e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(e.getMessage()));
     }
 
