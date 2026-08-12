@@ -21,4 +21,7 @@ public class InitializerProperties {
     private String adminUsername;
 
     private Set<String> roles;
+
+    @NotNull
+    private Boolean active;
 }

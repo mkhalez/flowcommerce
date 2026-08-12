@@ -1,5 +1,6 @@
 package com.coworking.space.userservice.services.implementation;
 
+import com.coworking.space.userservice.clients.AuthClient;
 import com.coworking.space.userservice.domain.entities.UserEntity;
 import com.coworking.space.userservice.dto.requests.UserCreateRequest;
 import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
@@ -35,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final CardRepository cardRepo;
     private final UserMapper userMapper;
     private final UserSpecification userSpecification;
+    private final AuthClient authClient;
 
     private static final int ZERO_CARD = 0;
     private static final String SORTING_BY_ID = "id";
@@ -115,7 +117,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CacheEvict(value = "user", key = "#id")
     public void changeStatus(int id, boolean status) {
-        userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+        var entity = userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+
+        try {
+            changeStatusInAuthService(Integer.parseInt(entity.getAuthUserId()), status);
+        } catch (Exception e) {
+            log.atError().setCause(e).addKeyValue("user id", id).log();
+            throw e;
+        }
 
         userRepo.updateStatusById(id, status);
 
@@ -132,14 +141,33 @@ public class UserServiceImpl implements UserService {
                     .addKeyValue("status", status)
                     .log();
         }
+
+
+
+
+    }
+
+    private void changeStatusInAuthService(int authId, boolean status) {
+        if(status) {
+            authClient.enableUserById(authId);
+        } else {
+            authClient.disableUserById(authId);
+        }
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "user", key = "#id")
     public void deleteById(int id) {
-        if (!userRepo.existsById(id)) {
-            throw new UserNotFoundException(USER_NOT_FOUND_ERROR);
+        var entity = userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+
+        try {
+            int authId = Integer.parseInt(entity.getAuthUserId());
+            authClient.deleteById(authId);
+            log.atInfo().addKeyValue("delete user from auth service with id", id).log();
+        } catch (Exception e) {
+            log.atError().setCause(e).addKeyValue("user id", id).log();
+            throw e;
         }
 
         cardRepo.deleteByUserId(id);

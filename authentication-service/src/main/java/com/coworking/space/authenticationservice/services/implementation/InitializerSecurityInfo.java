@@ -51,6 +51,7 @@ public class InitializerSecurityInfo implements CommandLineRunner {
                             .password(encodedPassword)
                                     .roles(Set.of(adminRole))
                                             .username(initializerProperties.getAdminUsername())
+                                                .active(initializerProperties.getActive())
                                                     .build();
             userRepo.save(adminEntity);
         }

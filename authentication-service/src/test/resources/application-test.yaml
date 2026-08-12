@@ -10,6 +10,7 @@ security:
   initial:
     admin-password: admin-test
     admin-username: password-test
+    active: true
     roles:
       - admin
       - user

@@ -34,6 +34,7 @@ public class SecurityConfig {
 
     private static final String AUTH_ROUTE_PATTERN = "/auth/**";
     private static final String PUBLIC_KEY_ROUTE = "/.well-known/jwks.json";
+    private static final String INTERNAL_ROUTE_PATTERN = "/internal/**";
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -60,7 +61,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(AUTH_ROUTE_PATTERN, PUBLIC_KEY_ROUTE).permitAll();
+                    auth.requestMatchers(AUTH_ROUTE_PATTERN, PUBLIC_KEY_ROUTE, INTERNAL_ROUTE_PATTERN).permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .sessionManagement(session ->

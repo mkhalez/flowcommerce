@@ -1,5 +1,6 @@
 package com.coworking.space.userservice;
 
+import com.coworking.space.userservice.clients.AuthClient;
 import com.coworking.space.userservice.dto.requests.CardCreateRequest;
 import com.coworking.space.userservice.dto.requests.UserCreateRequest;
 import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
@@ -8,6 +9,7 @@ import com.coworking.space.userservice.dto.responses.ErrorResponse;
 import com.coworking.space.userservice.dto.responses.UserResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +25,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,10 +61,20 @@ public class UserServiceIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @MockitoBean
+    private AuthClient authClient;
+
     @AfterEach
     void cleanDB() {
         jdbcTemplate.update(CLEAN_CARD_TABLE);
         jdbcTemplate.update(CLEAN_USER_TABLE);
+    }
+
+    @BeforeEach
+    void authClientSetting() {
+        doNothing().when(authClient).deleteById(anyInt());
+        doNothing().when(authClient).enableUserById(anyInt());
+        doNothing().when(authClient).disableUserById(anyInt());
     }
 
     @Test

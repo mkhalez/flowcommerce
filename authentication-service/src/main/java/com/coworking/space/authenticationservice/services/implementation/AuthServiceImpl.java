@@ -4,6 +4,7 @@ import com.coworking.space.authenticationservice.domain.entities.UserEntity;
 import com.coworking.space.authenticationservice.domain.exceptions.RefreshTokenInvalidOrExpiredException;
 import com.coworking.space.authenticationservice.domain.exceptions.RoleNotFoundException;
 import com.coworking.space.authenticationservice.domain.exceptions.UserAlreadyExistException;
+import com.coworking.space.authenticationservice.domain.exceptions.DisableUserException;
 import com.coworking.space.authenticationservice.domain.models.Role;
 import com.coworking.space.authenticationservice.domain.models.User;
 import com.coworking.space.authenticationservice.dto.request.LoginRequest;
@@ -20,7 +21,6 @@ import com.coworking.space.authenticationservice.utils.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.CachingUserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -54,6 +54,8 @@ public class AuthServiceImpl implements AuthService {
     private static final String USER_ROLE_NAME = "ROLE_USER";
     private static final String REFRESH_TYPE = "refresh";
     private static final String TOKEN_TYPE_NAME = "type";
+    private static final String USER_IS_DISABLED = "user is disabled";
+    private static final boolean INIT_ACTIVE = true;
 
     @Override
     public AuthResponse register(SingUpRequest userRequest) {
@@ -68,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
                 .username(userRequest.getUsername())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .roles(Set.of(roleEntity))
+                .active(INIT_ACTIVE)
                 .build();
 
         var saved = userRepo.save(userEntity);
@@ -98,6 +101,11 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(token);
 
         var userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        Boolean active = userDetails.getActive();
+        if(active != null && !active) {
+            throw new DisableUserException(USER_IS_DISABLED);
+        }
 
         var roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -140,6 +148,10 @@ public class AuthServiceImpl implements AuthService {
         String username = jwt.getSubject();
         var entity = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND));
+
+        if(!entity.getActive()) {
+            throw new DisableUserException(USER_IS_DISABLED);
+        }
 
         Set<Role> roles = entity.getRoles().stream()
                 .map(roleMapper::toRole)

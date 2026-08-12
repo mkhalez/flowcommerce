@@ -22,6 +22,8 @@ public class UserEntity {
 
     private String password;
 
+    private Boolean active;
+
     @ManyToMany
     @JoinTable(
             name = "user_roles",

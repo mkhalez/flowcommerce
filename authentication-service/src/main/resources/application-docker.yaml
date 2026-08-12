@@ -8,6 +8,7 @@ security:
   initial:
     admin-password: ${AUTH_ADMIN_PASSWORD}
     admin-username: ${AUTH_ADMIN_USERNAME}
+    active: true
     roles:
       - admin
       - user

@@ -1,3 +1,6 @@
 spring:
   liquibase:
     change-log: file:migrations/changelog.xml
+
+auth-service:
+  base-url: http://test

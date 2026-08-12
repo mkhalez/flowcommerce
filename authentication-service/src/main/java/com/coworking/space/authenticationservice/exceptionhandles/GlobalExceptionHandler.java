@@ -1,5 +1,6 @@
 package com.coworking.space.authenticationservice.exceptionhandles;
 
+import com.coworking.space.authenticationservice.domain.exceptions.DisableUserException;
 import com.coworking.space.authenticationservice.domain.exceptions.RefreshTokenInvalidOrExpiredException;
 import com.coworking.space.authenticationservice.domain.exceptions.RoleNotFoundException;
 import com.coworking.space.authenticationservice.domain.exceptions.UserAlreadyExistException;
@@ -59,6 +60,13 @@ public class GlobalExceptionHandler {
         log.atError().setCause(e).log();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(INTERNAL_SERVER_ERROR));
+    }
+
+    @ExceptionHandler(DisableUserException.class)
+    public ResponseEntity<ErrorResponse> handleDisableUserException(DisableUserException e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(e.getMessage()));
     }
 
 }
