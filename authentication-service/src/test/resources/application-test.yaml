@@ -1,0 +1,16 @@
+spring:
+  liquibase:
+    change-log: file:migrations/changelog.xml
+
+security:
+  keys:
+    public-key: classpath:certs/public_key_test.pem
+    private-key: classpath:certs/private_key_test.pem
+    kid: auth-service-0-test
+  initial:
+    admin-password: admin-test
+    admin-username: password-test
+    active: true
+    roles:
+      - admin
+      - user

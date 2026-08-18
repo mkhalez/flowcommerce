@@ -8,5 +8,6 @@ CREATE TABLE users(
     email text UNIQUE NOT NULL,
     active bool NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    last_modified_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+    last_modified_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    auth_user_id VARCHAR(255) NOT NULL
 );

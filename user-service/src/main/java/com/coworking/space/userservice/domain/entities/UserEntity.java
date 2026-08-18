@@ -47,4 +47,7 @@ public class UserEntity {
     @LastModifiedDate
     @Column(name ="last_modified_at", nullable = false)
     private LocalDateTime lastModifiedAt;
+
+    @Column(name = "auth_user_id", nullable = false, unique = true)
+    private String authUserId;
 }

@@ -11,3 +11,11 @@ spring:
       port: 6379
       timeout: 60000
       password: ${REDIS_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/.well-known/jwks.json
+
+auth-service:
+  base-url: http://localhost:8081/internal

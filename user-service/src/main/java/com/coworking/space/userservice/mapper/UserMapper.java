@@ -13,7 +13,8 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface UserMapper {
     @Mapping(target = "active", constant = "true")
-    UserEntity toUserEntity(UserCreateRequest request);
+    @Mapping(target = "authUserId", source = "authUserId")
+    UserEntity toUserEntity(UserCreateRequest request, String authUserId);
 
     @Mapping(target = "cardsCount", source = "count")
     UserResponse toUserResponse(UserEntity entity, int count);

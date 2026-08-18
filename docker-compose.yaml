@@ -1,33 +1,65 @@
 services:
-  postgres:
+  user-postgres:
     image: postgres:16
     container_name: user-service-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DOCKER_DB}
-      POSTGRES_USER: ${POSTGRES_DOCKER_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_DOCKER_PASSWORD}
+      POSTGRES_DB: ${USER_POSTGRES_DOCKER_DB}
+      POSTGRES_USER: ${USER_POSTGRES_DOCKER_USER}
+      POSTGRES_PASSWORD: ${USER_POSTGRES_DOCKER_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_DOCKER_USER} -d ${POSTGRES_DOCKER_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${USER_POSTGRES_DOCKER_USER} -d ${USER_POSTGRES_DOCKER_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - backend
 
-  liquibase:
+  auth-postgres:
+    image: postgres:16
+    container_name: auth-service-postgres
+    environment:
+      POSTGRES_DB: ${AUTH_POSTGRES_DOCKER_DB}
+      POSTGRES_USER: ${AUTH_POSTGRES_DOCKER_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_DOCKER_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${AUTH_POSTGRES_DOCKER_USER} -d ${AUTH_POSTGRES_DOCKER_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
+  user-liquibase:
     image: liquibase/liquibase:4.29
     container_name: liquibase_user_service_runner
     depends_on:
-      postgres:
+      user-postgres:
         condition: service_healthy
     volumes:
       - ./user-service/migrations:/liquibase/changelog
     environment:
-      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DOCKER_DB}
-      LIQUIBASE_COMMAND_USERNAME: ${POSTGRES_DOCKER_USER}
-      LIQUIBASE_COMMAND_PASSWORD: ${POSTGRES_DOCKER_PASSWORD}
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://user-postgres:5432/${USER_POSTGRES_DOCKER_DB}
+      LIQUIBASE_COMMAND_USERNAME: ${USER_POSTGRES_DOCKER_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${USER_POSTGRES_DOCKER_PASSWORD}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/changelog.xml
     command: ["update"]
+    networks:
+      - backend
+
+  auth-liquibase:
+    image: liquibase/liquibase:4.29
+    container_name: liquibase_auth_service_runner
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    volumes:
+      - ./authentication-service/migrations:/liquibase/changelog
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://auth-postgres:5432/${AUTH_POSTGRES_DOCKER_DB}
+      LIQUIBASE_COMMAND_USERNAME: ${AUTH_POSTGRES_DOCKER_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${AUTH_POSTGRES_DOCKER_PASSWORD}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/changelog.xml
+    command: [ "update" ]
     networks:
       - backend
 
@@ -45,23 +77,45 @@ services:
       - backend
 
   user-service:
-    image: mkhalez/user-service:0.1
+    image: mkhalez/user-service:latest
     container_name: user-service
     depends_on:
-      postgres:
+      user-postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-      liquibase:
+      user-liquibase:
         condition: service_completed_successfully
+      auth-service:
+        condition: service_started
     ports:
       - "8080:8080"
     restart: unless-stopped
     environment:
-      POSTGRES_DOCKER_DB: ${POSTGRES_DOCKER_DB}
-      POSTGRES_DOCKER_USER: ${POSTGRES_DOCKER_USER}
-      POSTGRES_DOCKER_PASSWORD: ${POSTGRES_DOCKER_PASSWORD}
+      POSTGRES_DOCKER_DB: ${USER_POSTGRES_DOCKER_DB}
+      POSTGRES_DOCKER_USER: ${USER_POSTGRES_DOCKER_USER}
+      POSTGRES_DOCKER_PASSWORD: ${USER_POSTGRES_DOCKER_PASSWORD}
       REDIS_DOCKER_PASSWORD: ${REDIS_DOCKER_PASSWORD}
+    networks:
+      - backend
+
+  auth-service:
+    image: mkhalez/authentication-service:latest
+    container_name: auth-service
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+      auth-liquibase:
+        condition: service_completed_successfully
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DOCKER_DB: ${AUTH_POSTGRES_DOCKER_DB}
+      POSTGRES_DOCKER_USER: ${AUTH_POSTGRES_DOCKER_USER}
+      POSTGRES_DOCKER_PASSWORD: ${AUTH_POSTGRES_DOCKER_PASSWORD}
+      AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_DOCKER_PASSWORD}
+      AUTH_ADMIN_USERNAME: ${AUTH_ADMIN_DOCKER_USERNAME}
     networks:
       - backend
 

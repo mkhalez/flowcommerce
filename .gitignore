@@ -32,9 +32,15 @@ build/
 ### VS Code ###
 .vscode/
 
-user-service/.env
 .env
 .mvn
 user-service/.mvn
 user-service/mvnw.cmd
+user-service/.env
+
+authentication-service/.mvn
+authentication-service/mvnw.cmd
+authentication-service/mvnw
+authentication-service/.env
+authentication-service/src/main/resources/certs/
 

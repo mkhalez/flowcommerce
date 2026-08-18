@@ -1,9 +1,11 @@
 package com.coworking.space.userservice.services.implementation;
 
+import com.coworking.space.userservice.clients.AuthClient;
 import com.coworking.space.userservice.domain.entities.UserEntity;
 import com.coworking.space.userservice.dto.requests.UserCreateRequest;
 import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
 import com.coworking.space.userservice.dto.responses.UserResponse;
+import com.coworking.space.userservice.exception.UserAlreadyExistException;
 import com.coworking.space.userservice.exception.UserNotFoundException;
 import com.coworking.space.userservice.mapper.UserMapper;
 import com.coworking.space.userservice.repositories.CardRepository;
@@ -34,14 +36,20 @@ public class UserServiceImpl implements UserService {
     private final CardRepository cardRepo;
     private final UserMapper userMapper;
     private final UserSpecification userSpecification;
+    private final AuthClient authClient;
 
     private static final int ZERO_CARD = 0;
     private static final String SORTING_BY_ID = "id";
     private static final String USER_NOT_FOUND_ERROR = "user not found";
+    private static final String USER_ALREADY_EXIST = "user already exist";
 
     @Override
-    public UserResponse createUser(UserCreateRequest request) {
-        var entity = userMapper.toUserEntity(request);
+    public UserResponse createUser(UserCreateRequest request, String authUserId) {
+        if(userRepo.existsByAuthUserId(authUserId)) {
+            throw new UserAlreadyExistException(USER_ALREADY_EXIST);
+        }
+
+        var entity = userMapper.toUserEntity(request, authUserId);
         var saved = userRepo.save(entity);
 
         log.atInfo().addKeyValue("create user with id", saved.getId()).log();
@@ -109,7 +117,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @CacheEvict(value = "user", key = "#id")
     public void changeStatus(int id, boolean status) {
-        userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+        var entity = userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+
+        try {
+            changeStatusInAuthService(Integer.parseInt(entity.getAuthUserId()), status);
+        } catch (Exception e) {
+            log.atError().setCause(e).addKeyValue("user id", id).log();
+            throw e;
+        }
 
         userRepo.updateStatusById(id, status);
 
@@ -126,14 +141,33 @@ public class UserServiceImpl implements UserService {
                     .addKeyValue("status", status)
                     .log();
         }
+
+
+
+
+    }
+
+    private void changeStatusInAuthService(int authId, boolean status) {
+        if(status) {
+            authClient.enableUserById(authId);
+        } else {
+            authClient.disableUserById(authId);
+        }
     }
 
     @Override
     @Transactional
     @CacheEvict(value = "user", key = "#id")
     public void deleteById(int id) {
-        if (!userRepo.existsById(id)) {
-            throw new UserNotFoundException(USER_NOT_FOUND_ERROR);
+        var entity = userRepo.findById(id).orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+
+        try {
+            int authId = Integer.parseInt(entity.getAuthUserId());
+            authClient.deleteById(authId);
+            log.atInfo().addKeyValue("delete user from auth service with id", id).log();
+        } catch (Exception e) {
+            log.atError().setCause(e).addKeyValue("user id", id).log();
+            throw e;
         }
 
         cardRepo.deleteByUserId(id);
