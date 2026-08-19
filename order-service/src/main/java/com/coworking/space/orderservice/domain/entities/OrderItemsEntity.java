@@ -1,11 +1,17 @@
 package com.coworking.space.orderservice.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 import org.hibernate.annotations.SoftDelete;
 
 @Entity
 @Table(name = "order_items")
 @SoftDelete
+@Builder
+@AllArgsConstructor
+@Getter
 public class OrderItemsEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
@@ -18,5 +24,5 @@ public class OrderItemsEntity extends BaseEntity {
     private Integer quantity;
 
     @Column(nullable = false)
-    private Boolean deleted = Boolean.FALSE;
+    private Boolean deleted;
 }

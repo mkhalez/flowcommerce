@@ -4,12 +4,13 @@ import com.coworking.space.orderservice.domain.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
 
-@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetOrderRequest {
+@Getter
+public class OrderFilterParams {
     private OffsetDateTime from;
 
     private OffsetDateTime to;

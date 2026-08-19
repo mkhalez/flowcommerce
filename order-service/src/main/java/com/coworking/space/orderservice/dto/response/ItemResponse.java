@@ -15,9 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemResponse {
     private int id;
-    private int userId;
-    private Status status;
-    private double totalPrice;
+    private String name;
+    private double price;
     private OffsetDateTime createAt;
-    private List<OrderItemResponse> items;
 }

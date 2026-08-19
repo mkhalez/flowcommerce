@@ -1,5 +1,6 @@
 package com.coworking.space.orderservice.dto.request;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,8 @@ import java.util.List;
 @Getter
 public class OrderRequest {
     private List<OrderItemRequest> items;
+
+    private @Email String email;
 
     @Getter
     @Setter
