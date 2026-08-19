@@ -6,6 +6,7 @@ CREATE TABLE order_items(
     order_id NOT NULL references orders(id),
     item_id NOT NULL references items(id),
     quantity int NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    last_modified_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+    deleted bool NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL
 );

@@ -7,6 +7,6 @@ CREATE TABLE orders(
     status text NOT NULL,
     total_price double precision NOT NULL,
     deleted bool NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    last_modified_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
