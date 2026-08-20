@@ -22,7 +22,4 @@ public class OrderItemsEntity extends BaseEntity {
     private ItemEntity item;
 
     private Integer quantity;
-
-    @Column(nullable = false)
-    private Boolean deleted;
 }

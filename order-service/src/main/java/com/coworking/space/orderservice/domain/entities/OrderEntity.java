@@ -21,13 +21,11 @@ public class OrderEntity extends BaseEntity{
     private Integer userId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @Column(nullable = false)
     private Double totalPrice;
-
-    @Column(nullable = false)
-    private Boolean deleted;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItemsEntity> orderItemsEntities = new HashSet<>();

@@ -11,5 +11,6 @@ public interface OrderMapper {
 
     @Mapping(target = "items", source = "entity.orderItemsEntities")
     @Mapping(target = "user", source = "user")
+    @Mapping(target = "id", source = "entity.id")
     OrderResponse toOrderResponse(OrderEntity entity, UserResponse user);
 }

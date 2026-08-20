@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer>, JpaS
     void updateStatusById(@Param("id") int id, @Param("status") boolean status);
 
     boolean existsByAuthUserId(String authUserId);
+
+    Optional<UserEntity> findByEmail(String email);
 }

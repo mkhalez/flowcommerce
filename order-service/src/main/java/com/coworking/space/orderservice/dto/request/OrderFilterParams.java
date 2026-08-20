@@ -1,6 +1,7 @@
 package com.coworking.space.orderservice.dto.request;
 
 import com.coworking.space.orderservice.domain.enums.Status;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,4 +17,7 @@ public class OrderFilterParams {
     private OffsetDateTime to;
 
     private Status status;
+
+    @Email
+    private String email;
 }

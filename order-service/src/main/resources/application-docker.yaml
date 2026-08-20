@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://order-postgres:5432/${POSTGRES_DOCKER_DB}
+    username: ${POSTGRES_DOCKER_USER}
+    password: ${POSTGRES_DOCKER_PASSWORD}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service:8081/.well-known/jwks.json
+
+user-service:
+  base-url: http://order-service:8082/api/users

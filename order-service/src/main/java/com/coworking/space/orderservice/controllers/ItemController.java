@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -22,6 +23,7 @@ public class ItemController {
     private static final String LOCATION_OF_CREATED_RESOURCE_PATTERN = "/api/item/{id}";
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ItemResponse> createItem(@RequestBody @Valid CreateItemRequest request, UriComponentsBuilder builder) {
         var response = itemService.createItem(request);
         var location = builder.path(LOCATION_OF_CREATED_RESOURCE_PATTERN).buildAndExpand(response.getId()).toUri();
@@ -32,18 +34,21 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ItemResponse> findById(@PathVariable @Positive int id) {
         var response = itemService.findById(id);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ItemResponse> updateById(@PathVariable @Positive int id, @RequestBody UpdateItemRequest request) {
         var response = itemService.updateById(id, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteById(@PathVariable @Positive int id) {
         itemService.deleteById(id);
         return ResponseEntity.noContent().build();

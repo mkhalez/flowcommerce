@@ -1,19 +1,14 @@
 package com.coworking.space.orderservice.clients;
 
 import com.coworking.space.orderservice.dto.response.UserResponse;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
 
-import java.util.List;
+public interface UserServiceClient {
+    @GetExchange("/user")
+    UserResponse findUserByEmail(@RequestParam String email);
 
-public class UserServiceClient {
-    public UserResponse findUserByEmail(String email) {
-        return null;
-    }
-
-    public UserResponse findById(int id) {
-
-    }
-
-    public List<UserResponse> findAll(List<Integer> ids) {
-
-    }
+    @GetExchange("/{id}")
+    UserResponse findById(@PathVariable int id);
 }

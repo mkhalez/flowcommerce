@@ -25,10 +25,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +40,6 @@ public class OrderServiceImpl implements OrderService {
 
     private static final String NOT_FOUND_ITEMS_ERROR = "products with these ids were not found: ";
     private static final String NOT_FOUND_ORDER_ERROR = "not found order";
-    private static final boolean NOT_DELETED_STATE = false;
     private static final String SORTING_BY_ID = "id";
     private static final String ORDER_STATUS_IS_NOT_CREATED_ERROR = "order status is not created";
 
@@ -55,7 +52,6 @@ public class OrderServiceImpl implements OrderService {
 
         var orderItemsEntitiesAndTotalPrice = getOrderItemsEntities(request.getItems(), orderEntity);
 
-        orderEntity.setDeleted(NOT_DELETED_STATE);
         orderEntity.setStatus(Status.CREATED);
         orderEntity.setTotalPrice(orderItemsEntitiesAndTotalPrice.getSecond());
         orderEntity.setOrderItemsEntities(orderItemsEntitiesAndTotalPrice.getFirst());
@@ -89,12 +85,9 @@ public class OrderServiceImpl implements OrderService {
                 .distinct()
                 .toList();
 
-        Map<Integer, UserResponse> userMap = userIds.isEmpty()
-                ? Collections.emptyMap()
-                : userServiceClient.findAll(userIds).stream()
-                .collect(Collectors.toMap(UserResponse::getId, user -> user));
+        UserResponse user = userServiceClient.findUserByEmail(orderFilterParams.getEmail());
 
-        return entities.map(orderEntity -> orderMapper.toOrderResponse(orderEntity, userMap.get(orderEntity.getUserId())));
+        return entities.map(orderEntity -> orderMapper.toOrderResponse(orderEntity, user));
     }
 
     @Override
@@ -134,6 +127,7 @@ public class OrderServiceImpl implements OrderService {
     public void deleteById(int id) {
         var entity = orderRepo.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
+        userServiceClient.findById(entity.getUserId());
 
         orderRepo.delete(entity);
     }
@@ -177,7 +171,6 @@ public class OrderServiceImpl implements OrderService {
                     .order(orderEntity)
                     .item(itemEntity)
                     .quantity(itemRequest.getQuantity())
-                    .deleted(NOT_DELETED_STATE)
                     .build();
 
             orderItemsEntities.add(orderItemsEntity);

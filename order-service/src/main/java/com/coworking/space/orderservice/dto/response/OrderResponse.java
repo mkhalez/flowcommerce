@@ -14,7 +14,6 @@ import java.util.Set;
 @Getter
 public class OrderResponse {
     private int id;
-    private int userId;
     private Status status;
     private double totalPrice;
     private OffsetDateTime createdAt;

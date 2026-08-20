@@ -5,12 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "items")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
+@SoftDelete
 public class ItemEntity extends BaseEntity {
     @Column(nullable = false)
     private String name;
