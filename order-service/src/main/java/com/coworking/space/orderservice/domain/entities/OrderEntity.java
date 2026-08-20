@@ -2,10 +2,7 @@ package com.coworking.space.orderservice.domain.entities;
 
 import com.coworking.space.orderservice.domain.enums.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SoftDelete;
 
 import java.util.HashSet;
@@ -18,6 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Setter
 @NoArgsConstructor
+@Getter
 public class OrderEntity extends BaseEntity{
     @Column(nullable = false)
     private Integer userId;

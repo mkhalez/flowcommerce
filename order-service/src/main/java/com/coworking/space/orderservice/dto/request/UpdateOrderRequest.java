@@ -12,8 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class OrderRequest {
+public class UpdateOrderRequest {
     private List<OrderItemRequest> items;
-
-    private @Email String email;
 }

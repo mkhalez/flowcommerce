@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Builder
@@ -16,6 +17,7 @@ public class OrderResponse {
     private int userId;
     private Status status;
     private double totalPrice;
-    private OffsetDateTime createAt;
-    private List<OrderItemResponse> items;
+    private OffsetDateTime createdAt;
+    private Set<OrderItemResponse> items;
+    private UserResponse user;
 }

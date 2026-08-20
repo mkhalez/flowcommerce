@@ -2,6 +2,8 @@ package com.coworking.space.orderservice.controllers;
 
 import com.coworking.space.orderservice.dto.request.OrderFilterParams;
 import com.coworking.space.orderservice.dto.request.OrderRequest;
+import com.coworking.space.orderservice.dto.request.UpdateOrderRequest;
+import com.coworking.space.orderservice.dto.request.UpdateOrderStatusRequest;
 import com.coworking.space.orderservice.dto.response.OrderResponse;
 import com.coworking.space.orderservice.services.OrderService;
 import jakarta.validation.Valid;
@@ -13,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/order")
@@ -46,13 +50,13 @@ public class OrderController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<OrderResponse> findByUserId(@PathVariable int userId) {
+    public ResponseEntity<List<OrderResponse>> findByUserId(@PathVariable int userId) {
         var response = orderService.findByUserId(userId);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<OrderResponse> updateById(@PathVariable int id, OrderRequest request) {
+    public ResponseEntity<OrderResponse> updateById(@PathVariable int id, @RequestBody UpdateOrderRequest request) {
         var response = orderService.updateById(id, request);
         return ResponseEntity.ok(response);
     }
@@ -61,6 +65,12 @@ public class OrderController {
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
         orderService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderResponse> updateStatusById(@PathVariable int id, @RequestBody UpdateOrderStatusRequest request) {
+        var response = orderService.updateStatusById(id, request);
+        return ResponseEntity.ok(response);
     }
 
 }
