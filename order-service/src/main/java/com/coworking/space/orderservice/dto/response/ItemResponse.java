@@ -17,5 +17,5 @@ public class ItemResponse {
     private int id;
     private String name;
     private double price;
-    private OffsetDateTime createAt;
+    private OffsetDateTime createdAt;
 }

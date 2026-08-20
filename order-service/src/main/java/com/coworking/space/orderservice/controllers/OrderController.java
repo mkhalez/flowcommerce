@@ -45,14 +45,14 @@ public class OrderController {
 
     @GetMapping("/list")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<Page<OrderResponse>> getOrders(OrderFilterParams orderFilterParams,
+    public ResponseEntity<Page<OrderResponse>> getOrders(@Valid OrderFilterParams orderFilterParams,
                                                          int limit,
                                                          int page) {
         var response = orderService.getOrders(orderFilterParams, limit, page);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<List<OrderResponse>> findByUserId(@PathVariable int userId) {
         var response = orderService.findByUserId(userId);
@@ -73,7 +73,7 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/status/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponse> updateStatusById(@PathVariable int id, @RequestBody UpdateOrderStatusRequest request) {
         var response = orderService.updateStatusById(id, request);

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SoftDelete;
 
 @Entity
@@ -12,6 +13,7 @@ import org.hibernate.annotations.SoftDelete;
 @Builder
 @AllArgsConstructor
 @Getter
+@NoArgsConstructor
 public class OrderItemsEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)

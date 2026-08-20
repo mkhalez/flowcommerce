@@ -13,3 +13,5 @@ spring:
 
 user-service:
   base-url: http://localhost:8080/api/users
+  connection-timeout: 500
+  read-timeout: 500

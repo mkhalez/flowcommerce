@@ -7,8 +7,12 @@ import com.coworking.space.orderservice.dto.response.ItemResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 @Mapper(componentModel = "spring")
-public interface ItemMapper {
+public interface ItemMapper extends BaseMapper{
     ItemEntity toEntity(CreateItemRequest request);
 
     ItemResponse toResponse(ItemEntity entity);

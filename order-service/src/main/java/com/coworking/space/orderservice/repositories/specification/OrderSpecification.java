@@ -24,14 +24,14 @@ public class OrderSpecification {
         return  (root, query, builder) ->
                 from == null
                         ? builder.conjunction()
-                        : builder.greaterThanOrEqualTo((root.get(CREATE_AT_FIELD)), from);
+                        : builder.greaterThanOrEqualTo((root.get(CREATE_AT_FIELD)), from.toInstant());
     }
 
     public Specification<OrderEntity> createTo(OffsetDateTime to) {
         return  (root, query, builder) ->
                 to == null
                         ? builder.conjunction()
-                        : builder.lessThanOrEqualTo((root.get(CREATE_AT_FIELD)), to);
+                        : builder.lessThanOrEqualTo((root.get(CREATE_AT_FIELD)), to.toInstant());
     }
 
 }

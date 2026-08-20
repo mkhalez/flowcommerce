@@ -5,12 +5,14 @@ import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class OrderFilterParams {
     private OffsetDateTime from;
 

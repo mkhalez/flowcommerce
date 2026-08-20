@@ -6,8 +6,12 @@ import com.coworking.space.orderservice.dto.response.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 @Mapper(componentModel = "spring", uses = OrderItemsMapper.class)
-public interface OrderMapper {
+public interface OrderMapper extends BaseMapper {
 
     @Mapping(target = "items", source = "entity.orderItemsEntities")
     @Mapping(target = "user", source = "user")

@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
@@ -20,9 +22,9 @@ public class BaseEntity {
 
     @CreatedDate
     @Column(nullable = false)
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(nullable = false)
-    private OffsetDateTime lastModifiedAt;
+    private Instant lastModifiedAt;
 }
