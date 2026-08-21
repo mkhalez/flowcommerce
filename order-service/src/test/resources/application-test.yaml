@@ -1,19 +1,11 @@
 spring:
-  profiles:
-    default: local
-  application:
-    name: order-service
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: true
-    properties:
-      hibernate:
-        default_batch_fetch_size: 50
-        format_sql: true
+  liquibase:
+    change-log: file:migrations/changelog.xml
 
-server:
-  port: 8082
+user-service:
+  base-url: http://localhost:8080/api/users
+  connection-timeout: 3000
+  read-timeout: 3000
 
 resilience4j:
   circuitbreaker:

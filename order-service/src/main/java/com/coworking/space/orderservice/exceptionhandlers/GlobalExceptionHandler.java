@@ -1,9 +1,8 @@
 package com.coworking.space.orderservice.exceptionhandlers;
 
-import com.coworking.space.orderservice.domain.exceptions.ItemNotFoundException;
-import com.coworking.space.orderservice.domain.exceptions.OrderNotFoundException;
-import com.coworking.space.orderservice.domain.exceptions.OrderStatusIsNotCreated;
+import com.coworking.space.orderservice.domain.exceptions.*;
 import com.coworking.space.orderservice.dto.response.ErrorResponse;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 
 @RestControllerAdvice
@@ -21,20 +21,15 @@ public class GlobalExceptionHandler {
     private static final String NOT_HAVE_PERMITION = "access denied: You don't have permission to perform this operation";
     private static final String INVALID_OR_EXPIRED_TOKEN = "authentication failed: Invalid or expired token";
     private static final String UNEXPECTED_ERROR = "unexpected error occurred";
-    private static final String DOWNSTREAM_SERVICE_UNAVAILABLE = "Downstream service is unavailable";
+    private static final String EXTERNAL_SERVICE_UNAVAILABLE = "downstream service is temporarily unavailable, please try again later";
 
 
-    @ExceptionHandler(RestClientException.class)
+    @ExceptionHandler(HttpStatusCodeException.class)
     public ResponseEntity<ErrorResponse> handleRestClientException(RestClientException e) {
         log.atError().setCause(e).log();
 
-        if (e instanceof HttpStatusCodeException httpException) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse(e.getMessage()));
-        }
-
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(new ErrorResponse(DOWNSTREAM_SERVICE_UNAVAILABLE));
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(new ErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler({
@@ -69,6 +64,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse(INVALID_OR_EXPIRED_TOKEN));
+    }
+
+    @ExceptionHandler({
+            CallNotPermittedException.class,
+            ResourceAccessException.class
+    })
+    public ResponseEntity<ErrorResponse> handleUserServiceUnavailable(Exception e) {
+        log.error("user-service unavailable", e);
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(new ErrorResponse(EXTERNAL_SERVICE_UNAVAILABLE));
     }
 
     @ExceptionHandler(Exception.class)

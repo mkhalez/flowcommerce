@@ -16,6 +16,7 @@ import com.coworking.space.orderservice.repositories.ItemRepository;
 import com.coworking.space.orderservice.repositories.OrderRepository;
 import com.coworking.space.orderservice.repositories.specification.OrderSpecification;
 import com.coworking.space.orderservice.services.OrderService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "UserServiceCB")
     public OrderResponse createOrder(OrderRequest request) {
         UserResponse user = userServiceClient.findUserByEmail(request.getEmail());
         OrderEntity orderEntity = new OrderEntity();
@@ -61,6 +63,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @CircuitBreaker(name = "UserServiceCB")
     public OrderResponse findById(int id) {
         var entity = orderRepo.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
@@ -71,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @CircuitBreaker(name = "UserServiceCB")
     public Page<OrderResponse> getOrders(OrderFilterParams orderFilterParams, int limit, int pageNum) {
         Pageable page = PageRequest.of(pageNum, limit, Sort.by(SORTING_BY_ID));
         Specification<OrderEntity> spec = Specification.<OrderEntity>unrestricted()
@@ -91,6 +95,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @CircuitBreaker(name = "UserServiceCB")
     public List<OrderResponse> findByUserId(int userId) {
         var orderEntities = orderRepo.findByUserId(userId);
         var user = userServiceClient.findById(userId);
@@ -102,6 +107,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @CircuitBreaker(name = "UserServiceCB")
     @Transactional
     public OrderResponse updateById(int id, UpdateOrderRequest request) {
         var orderEntity = orderRepo.findById(id)
@@ -134,6 +140,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "UserServiceCB")
     public OrderResponse updateStatusById(int id, UpdateOrderStatusRequest request) {
         var entity = orderRepo.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
