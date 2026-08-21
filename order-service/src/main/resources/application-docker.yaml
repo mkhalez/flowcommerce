@@ -11,3 +11,5 @@ spring:
 
 user-service:
   base-url: http://order-service:8082/api/users
+  connection-timeout: 3000
+  read-timeout: 3000
