@@ -79,10 +79,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderEntity updateById(int id, UpdateOrderRequest request) {
-        var orderEntity = orderRepo.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
-
+    public OrderEntity updateById(OrderEntity orderEntity, UpdateOrderRequest request) {
         if(orderEntity.getStatus() != Status.CREATED) {
             throw new OrderStatusIsNotCreated(ORDER_STATUS_IS_NOT_CREATED_ERROR);
         }
@@ -103,10 +100,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderEntity updateStatusById(int id, UpdateOrderStatusRequest request) {
-        var entity = orderRepo.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
-        entity.setStatus(request.getStatus());
+    public OrderEntity updateStatusById(OrderEntity entity, Status status) {
+        entity.setStatus(status);
         return orderRepo.save(entity);
     }
 

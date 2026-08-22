@@ -22,9 +22,9 @@ public interface OrderService {
 
     List<OrderEntity> findByUserId(int userId);
 
-    OrderEntity updateById(@PathVariable int id, UpdateOrderRequest request);
+    OrderEntity updateById(OrderEntity orderEntity, UpdateOrderRequest request);
 
     void deleteEntity(OrderEntity entity);
 
-    OrderEntity updateStatusById(int id, UpdateOrderStatusRequest request);
+    OrderEntity updateStatusById(OrderEntity entity, Status status);
 }

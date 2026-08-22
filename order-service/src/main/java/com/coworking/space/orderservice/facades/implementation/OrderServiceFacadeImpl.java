@@ -55,8 +55,9 @@ public class OrderServiceFacadeImpl implements OrderServiceFacade {
 
     @Override
     public OrderResponse updateById(int id, UpdateOrderRequest request) {
-        var entity = orderService.updateById(id, request);
+        var entity = orderService.findById(id);
         var user = userServiceClient.findById(entity.getUserId());
+        entity = orderService.updateById(entity, request);
         return orderMapper.toOrderResponse(entity, user);
     }
 
@@ -69,8 +70,10 @@ public class OrderServiceFacadeImpl implements OrderServiceFacade {
 
     @Override
     public OrderResponse updateStatusById(int id, UpdateOrderStatusRequest request) {
-        var entity = orderService.updateStatusById(id, request);
+        var entity = orderService.findById(id);
         var user = userServiceClient.findById(entity.getUserId());
+        entity = orderService.updateStatusById(entity, request.getStatus());
+
         return orderMapper.toOrderResponse(entity, user);
     }
 }
