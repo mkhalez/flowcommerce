@@ -5,7 +5,7 @@ import com.coworking.space.orderservice.dto.request.OrderRequest;
 import com.coworking.space.orderservice.dto.request.UpdateOrderRequest;
 import com.coworking.space.orderservice.dto.request.UpdateOrderStatusRequest;
 import com.coworking.space.orderservice.dto.response.OrderResponse;
-import com.coworking.space.orderservice.services.OrderService;
+import com.coworking.space.orderservice.facades.OrderServiceFacade;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,14 +21,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 public class OrderController {
-    private final OrderService orderService;
+    private final OrderServiceFacade orderServiceFacade;
 
     private static final String LOCATION_OF_CREATED_RESOURCE_PATTERN = "/api/order/{id}";
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request, UriComponentsBuilder builder) {
-        var response = orderService.createOrder(request);
+        var response = orderServiceFacade.createOrder(request);
         var location = builder.path(LOCATION_OF_CREATED_RESOURCE_PATTERN).buildAndExpand(response.getId()).toUri();
 
         return ResponseEntity
@@ -39,7 +39,7 @@ public class OrderController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<OrderResponse> findById(@PathVariable int id) {
-        var response = orderService.findById(id);
+        var response = orderServiceFacade.findById(id);
         return ResponseEntity.ok(response);
     }
 
@@ -48,35 +48,35 @@ public class OrderController {
     public ResponseEntity<Page<OrderResponse>> getOrders(@Valid OrderFilterParams orderFilterParams,
                                                          int limit,
                                                          int page) {
-        var response = orderService.getOrders(orderFilterParams, limit, page);
+        var response = orderServiceFacade.getOrders(orderFilterParams, limit, page);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<List<OrderResponse>> findByUserId(@PathVariable int userId) {
-        var response = orderService.findByUserId(userId);
+        var response = orderServiceFacade.findByUserId(userId);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<OrderResponse> updateById(@PathVariable int id, @RequestBody UpdateOrderRequest request) {
-        var response = orderService.updateById(id, request);
+        var response = orderServiceFacade.updateById(id, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
-        orderService.deleteById(id);
+        orderServiceFacade.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/status/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderResponse> updateStatusById(@PathVariable int id, @RequestBody UpdateOrderStatusRequest request) {
-        var response = orderService.updateStatusById(id, request);
+        var response = orderServiceFacade.updateStatusById(id, request);
         return ResponseEntity.ok(response);
     }
 

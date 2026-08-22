@@ -1,6 +1,5 @@
 package com.coworking.space.orderservice.services.implementation;
 
-import com.coworking.space.orderservice.clients.UserServiceClient;
 import com.coworking.space.orderservice.domain.entities.ItemEntity;
 import com.coworking.space.orderservice.domain.entities.OrderEntity;
 import com.coworking.space.orderservice.domain.entities.OrderItemsEntity;
@@ -11,7 +10,6 @@ import com.coworking.space.orderservice.domain.exceptions.OrderStatusIsNotCreate
 import com.coworking.space.orderservice.dto.request.*;
 import com.coworking.space.orderservice.dto.response.OrderResponse;
 import com.coworking.space.orderservice.dto.response.UserResponse;
-import com.coworking.space.orderservice.mappers.OrderMapper;
 import com.coworking.space.orderservice.repositories.ItemRepository;
 import com.coworking.space.orderservice.repositories.OrderRepository;
 import com.coworking.space.orderservice.repositories.specification.OrderSpecification;
@@ -33,11 +31,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    private final UserServiceClient userServiceClient;
     private final ItemRepository itemRepo;
     private final OrderRepository orderRepo;
     private final OrderSpecification orderSpecification;
-    private final OrderMapper orderMapper;
 
     private static final String NOT_FOUND_ITEMS_ERROR = "products with these ids were not found: ";
     private static final String NOT_FOUND_ORDER_ERROR = "not found order";
@@ -46,11 +42,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @CircuitBreaker(name = "UserServiceCB")
-    public OrderResponse createOrder(OrderRequest request) {
-        UserResponse user = userServiceClient.findUserByEmail(request.getEmail());
+    public OrderEntity createOrder(OrderRequest request, int userId) {
         OrderEntity orderEntity = new OrderEntity();
-        orderEntity.setUserId(user.getId());
+        orderEntity.setUserId(userId);
 
         var orderItemsEntitiesAndTotalPrice = getOrderItemsEntities(request.getItems(), orderEntity);
 
@@ -58,58 +52,34 @@ public class OrderServiceImpl implements OrderService {
         orderEntity.setTotalPrice(orderItemsEntitiesAndTotalPrice.getSecond());
         orderEntity.setOrderItemsEntities(orderItemsEntitiesAndTotalPrice.getFirst());
 
-        var entity = orderRepo.save(orderEntity);
-        return orderMapper.toOrderResponse(entity, user);
+        return orderRepo.save(orderEntity);
     }
 
     @Override
-    @CircuitBreaker(name = "UserServiceCB")
-    public OrderResponse findById(int id) {
-        var entity = orderRepo.findById(id)
+    public OrderEntity findById(int id) {
+        return orderRepo.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
-
-        UserResponse user = userServiceClient.findById(entity.getUserId());
-
-        return orderMapper.toOrderResponse(entity, user);
     }
 
     @Override
-    @CircuitBreaker(name = "UserServiceCB")
-    public Page<OrderResponse> getOrders(OrderFilterParams orderFilterParams, int limit, int pageNum) {
+    public Page<OrderEntity> getOrders(OrderFilterParams orderFilterParams, int limit, int pageNum) {
         Pageable page = PageRequest.of(pageNum, limit, Sort.by(SORTING_BY_ID));
         Specification<OrderEntity> spec = Specification.<OrderEntity>unrestricted()
                 .and(orderSpecification.createFrom(orderFilterParams.getFrom()))
                 .and(orderSpecification.createTo(orderFilterParams.getTo()))
                 .and(orderSpecification.hasStatus(orderFilterParams.getStatus()));
 
-        var entities = orderRepo.findAll(spec, page);
-
-        List<Integer> userIds = entities.getContent().stream()
-                .map(OrderEntity::getUserId)
-                .distinct()
-                .toList();
-
-        UserResponse user = userServiceClient.findUserByEmail(orderFilterParams.getEmail());
-
-        return entities.map(orderEntity -> orderMapper.toOrderResponse(orderEntity, user));
+        return orderRepo.findAll(spec, page);
     }
 
     @Override
-    @CircuitBreaker(name = "UserServiceCB")
-    public List<OrderResponse> findByUserId(int userId) {
-        var orderEntities = orderRepo.findByUserId(userId);
-        var user = userServiceClient.findById(userId);
-
-        return orderEntities
-                .stream()
-                .map(orderEntity -> orderMapper.toOrderResponse(orderEntity, user))
-                .toList();
+    public List<OrderEntity> findByUserId(int userId) {
+        return orderRepo.findByUserId(userId);
     }
 
     @Override
-    @CircuitBreaker(name = "UserServiceCB")
     @Transactional
-    public OrderResponse updateById(int id, UpdateOrderRequest request) {
+    public OrderEntity updateById(int id, UpdateOrderRequest request) {
         var orderEntity = orderRepo.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
 
@@ -117,38 +87,27 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderStatusIsNotCreated(ORDER_STATUS_IS_NOT_CREATED_ERROR);
         }
 
-        var user = userServiceClient.findById(orderEntity.getUserId());
-
         var orderItemsEntitiesAndTotalPrice = getOrderItemsEntities(request.getItems(), orderEntity);
         orderEntity.getOrderItemsEntities().clear();
         orderEntity.getOrderItemsEntities().addAll(orderItemsEntitiesAndTotalPrice.getFirst());
         orderEntity.setTotalPrice(orderItemsEntitiesAndTotalPrice.getSecond());
 
-        var newEntity = orderRepo.save(orderEntity);
-        return orderMapper.toOrderResponse(newEntity, user);
+        return orderRepo.save(orderEntity);
     }
 
     @Override
     @Transactional
-    public void deleteById(int id) {
-        var entity = orderRepo.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
-        userServiceClient.findById(entity.getUserId());
-
+    public void deleteEntity(OrderEntity entity) {
         orderRepo.delete(entity);
     }
 
     @Override
     @Transactional
-    @CircuitBreaker(name = "UserServiceCB")
-    public OrderResponse updateStatusById(int id, UpdateOrderStatusRequest request) {
+    public OrderEntity updateStatusById(int id, UpdateOrderStatusRequest request) {
         var entity = orderRepo.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(NOT_FOUND_ORDER_ERROR));
-        var user = userServiceClient.findById(entity.getUserId());
         entity.setStatus(request.getStatus());
-
-        var newEntity = orderRepo.save(entity);
-        return orderMapper.toOrderResponse(newEntity, user);
+        return orderRepo.save(entity);
     }
 
     private Pair<Set<OrderItemsEntity>, Double> getOrderItemsEntities(List<OrderItemRequest> orderItemRequests, OrderEntity orderEntity) {

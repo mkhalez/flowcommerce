@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.service.annotation.GetExchange;
 
+@CircuitBreaker(name = "UserServiceCB")
 public interface UserServiceClient {
 
     @GetExchange("/user")
