@@ -1,0 +1,21 @@
+spring:
+  liquibase:
+    change-log: file:migrations/changelog.xml
+
+user-service:
+  base-url: http://localhost:8080/api/users
+  connection-timeout: 3000
+  read-timeout: 3000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      UserServiceCB:
+        sliding-window-type: count_based
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        minimumNumberOfCalls: 5
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 2
+        record-exceptions:
+          - org.springframework.web.client.ResourceAccessException

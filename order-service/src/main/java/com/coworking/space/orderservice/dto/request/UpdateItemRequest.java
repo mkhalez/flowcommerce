@@ -1,0 +1,16 @@
+package com.coworking.space.orderservice.dto.request;
+
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@Getter
+@NoArgsConstructor
+public class UpdateItemRequest {
+    private String name;
+
+    @Positive
+    private Double price;
+}

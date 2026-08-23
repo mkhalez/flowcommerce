@@ -1,6 +1,8 @@
 package com.coworking.space.userservice.controllers;
 
 import com.coworking.space.userservice.dto.requests.UserCreateRequest;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,6 +36,13 @@ public class UserController {
         var response = userService.createUser(request, authUserId);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasRole('ADMIN') or @userUtil.getAuthIdByEmail(#email).equals(authentication.principal.claims['userId'].toString)")
+    public ResponseEntity<UserResponse> findByEmail(@RequestParam @NotBlank @Email String email) {
+        var response = userService.findByEmail(email);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")

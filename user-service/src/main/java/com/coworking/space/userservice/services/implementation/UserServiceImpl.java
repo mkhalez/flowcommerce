@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
@@ -141,10 +142,18 @@ public class UserServiceImpl implements UserService {
                     .addKeyValue("status", status)
                     .log();
         }
+    }
 
+    @Override
+    public UserResponse findByEmail(String email) {
+        var entity = userRepo.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_ERROR));
 
+        int cardsCount = cardRepo.countByUserId(entity.getId());
 
+        log.atInfo().addKeyValue("find user with id", entity.getId()).log();
 
+        return userMapper.toUserResponse(entity, cardsCount);
     }
 
     private void changeStatusInAuthService(int authId, boolean status) {

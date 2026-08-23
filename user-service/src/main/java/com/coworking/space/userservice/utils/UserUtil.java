@@ -18,4 +18,11 @@ public class UserUtil {
 
         return entity.getAuthUserId();
     }
+
+    public String getAuthIdByEmail(String email) {
+        var entity = userRepo.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
+
+        return entity.getAuthUserId();
+    }
 }

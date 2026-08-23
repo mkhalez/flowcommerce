@@ -1,8 +1,6 @@
 package com.coworking.space.userservice.services;
 
-import com.coworking.space.userservice.dto.requests.UserCreateRequest;
-import com.coworking.space.userservice.dto.requests.UserFilterRequest;
-import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
+import com.coworking.space.userservice.dto.requests.*;
 import com.coworking.space.userservice.dto.responses.UserResponse;
 import org.springframework.data.domain.Page;
 
@@ -20,4 +18,6 @@ public interface UserService {
     void changeStatus(int id, boolean status);
 
     void deleteById(int id);
+
+    UserResponse findByEmail(String email);
 }

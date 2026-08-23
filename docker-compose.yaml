@@ -29,6 +29,21 @@ services:
     networks:
       - backend
 
+  order-postgres:
+    image: postgres:16
+    container_name: order-service-postgres
+    environment:
+      POSTGRES_DB: ${ORDER_POSTGRES_DOCKER_DB}
+      POSTGRES_USER: ${ORDER_POSTGRES_DOCKER_USER}
+      POSTGRES_PASSWORD: ${ORDER_POSTGRES_DOCKER_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${ORDER_POSTGRES_DOCKER_USER} -d ${ORDER_POSTGRES_DOCKER_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+
   user-liquibase:
     image: liquibase/liquibase:4.29
     container_name: liquibase_user_service_runner
@@ -43,6 +58,23 @@ services:
       LIQUIBASE_COMMAND_PASSWORD: ${USER_POSTGRES_DOCKER_PASSWORD}
       LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/changelog.xml
     command: ["update"]
+    networks:
+      - backend
+
+  order-liquibase:
+    image: liquibase/liquibase:4.29
+    container_name: liquibase_order_service_runner
+    depends_on:
+      user-postgres:
+        condition: service_healthy
+    volumes:
+      - ./order-service/migrations:/liquibase/changelog
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://order-postgres:5432/${ORDER_POSTGRES_DOCKER_DB}
+      LIQUIBASE_COMMAND_USERNAME: ${ORDER_POSTGRES_DOCKER_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${ORDER_POSTGRES_DOCKER_PASSWORD}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/changelog.xml
+    command: [ "update" ]
     networks:
       - backend
 
@@ -89,13 +121,35 @@ services:
       auth-service:
         condition: service_started
     ports:
-      - "8080:8080"
+      - "8083:8080"
     restart: unless-stopped
     environment:
       POSTGRES_DOCKER_DB: ${USER_POSTGRES_DOCKER_DB}
       POSTGRES_DOCKER_USER: ${USER_POSTGRES_DOCKER_USER}
       POSTGRES_DOCKER_PASSWORD: ${USER_POSTGRES_DOCKER_PASSWORD}
       REDIS_DOCKER_PASSWORD: ${REDIS_DOCKER_PASSWORD}
+    networks:
+      - backend
+
+  order-service:
+    image: mkhalez/order-service:latest
+    container_name: order-service
+    depends_on:
+      order-postgres:
+        condition: service_healthy
+      order-liquibase:
+        condition: service_completed_successfully
+      auth-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    restart: unless-stopped
+    environment:
+      POSTGRES_DOCKER_DB: ${ORDER_POSTGRES_DOCKER_DB}
+      POSTGRES_DOCKER_USER: ${ORDER_POSTGRES_DOCKER_USER}
+      POSTGRES_DOCKER_PASSWORD: ${ORDER_POSTGRES_DOCKER_PASSWORD}
     networks:
       - backend
 
