@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    default: local
+  application:
+    name: api-gateway
+
+
+app:
+  authentication-free-routes:
+    - /auth/**

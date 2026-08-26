@@ -1,0 +1,26 @@
+spring:
+  config:
+    import: optional:file:user-service/.env[.properties]
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/.well-known/jwks.json
+
+  cloud:
+    gateway:
+      routes:
+        - id: auth-route
+          uri: http://localhost:8081
+          predicate:
+            - Path=/auth
+
+        - id: order-route
+          uri: http://localhost:8082
+          predicate:
+            - Path=/order
+
+        - id: user-route
+          uti: http://localhost:8080
+          predicate:
+            - Path=/user
