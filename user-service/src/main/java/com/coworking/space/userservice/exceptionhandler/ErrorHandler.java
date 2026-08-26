@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -25,6 +26,8 @@ public class ErrorHandler {
     private static final String NOT_HAVE_PERMITION = "access denied: You don't have permission to perform this operation";
     private static final String INVALID_OR_EXPIRED_TOKEN = "authentication failed: Invalid or expired token";
     private static final String UNEXPECTED_ERROR = "unexpected error occurred";
+    private static final String NOT_SUPPORTED_ROUTE_ERROR = "route is not supported";
+
 
     @ExceptionHandler(ExceededLimitException.class)
     public ResponseEntity<ErrorResponse> handleExceededLimitException(Exception e) {
@@ -32,6 +35,13 @@ public class ErrorHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ErrorResponse(NOT_SUPPORTED_ROUTE_ERROR));
     }
 
     @ExceptionHandler(UserAlreadyExistException.class)

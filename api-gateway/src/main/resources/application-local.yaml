@@ -9,18 +9,31 @@ spring:
 
   cloud:
     gateway:
-      routes:
-        - id: auth-route
-          uri: http://localhost:8081
-          predicate:
-            - Path=/auth
+      server:
+        webflux:
+          routes:
+            - id: auth-refresh-route
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/auth/refresh
+              filters:
+                - JwtClaimAuthorize=type,refresh
 
-        - id: order-route
-          uri: http://localhost:8082
-          predicate:
-            - Path=/order
+            - id: auth-route
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/auth/**
 
-        - id: user-route
-          uti: http://localhost:8080
-          predicate:
-            - Path=/user
+            - id: order-route
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/order/**
+              filters:
+                - JwtClaimAuthorize=type,access
+
+            - id: user-route
+              uri: http://localhost:8080
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - JwtClaimAuthorize=type,access

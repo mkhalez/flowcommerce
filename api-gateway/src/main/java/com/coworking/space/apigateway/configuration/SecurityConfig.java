@@ -27,8 +27,9 @@ public class SecurityConfig {
                                                          Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthenticationConverter) {
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges
-                        -> exchanges.pathMatchers(properties.getAuthenticationFreeRoutes().toArray(new String[0])).permitAll()
-                        .anyExchange().authenticated())
+                        -> exchanges.pathMatchers(properties.getPermitAllRoutes().toArray(new String[0])).permitAll()
+                        .pathMatchers(properties.getAuthenticatedRoutes().toArray(new String[0])).authenticated()
+                        .anyExchange().denyAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(
                         jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
                 ))

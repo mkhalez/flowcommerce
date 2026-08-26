@@ -9,11 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +23,8 @@ public class JwtClaimAuthorizeGatewayFilterFactory extends AbstractGatewayFilter
     private final ObjectMapper objectMapper;
 
     private static final String ERROR_MESSAGE = "token should be ";
+    private static final String CLAIM_NAME = "claimName";
+    private static final String EXPECTED_VALUE = "expectedValue";
 
     public JwtClaimAuthorizeGatewayFilterFactory(ObjectMapper objectMapper) {
         super(Config.class);
@@ -32,7 +33,7 @@ public class JwtClaimAuthorizeGatewayFilterFactory extends AbstractGatewayFilter
 
     @Override
     public List<String> shortcutFieldOrder() {
-        return List.of("claimName", "expectedValue");
+        return List.of(CLAIM_NAME, EXPECTED_VALUE);
     }
 
     @Override
@@ -51,13 +52,8 @@ public class JwtClaimAuthorizeGatewayFilterFactory extends AbstractGatewayFilter
                     response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
                     response.setStatusCode(HttpStatus.FORBIDDEN);
 
-                    byte[] bytes;
                     String message = ERROR_MESSAGE + config.expectedValue;
-                    try {
-                        bytes = objectMapper.writeValueAsString(message).getBytes(StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        bytes = ("\"" + message + "\"").getBytes(StandardCharsets.UTF_8);
-                    }
+                    byte[] bytes = objectMapper.writeValueAsString(message).getBytes(StandardCharsets.UTF_8);
                     DataBuffer buffer = response.bufferFactory().wrap(bytes);
                     return response.writeWith(Mono.just(buffer));
                 }));
@@ -65,7 +61,7 @@ public class JwtClaimAuthorizeGatewayFilterFactory extends AbstractGatewayFilter
 
     @Getter
     @Setter
-    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Config {
         private String claimName;
         private String expectedValue;

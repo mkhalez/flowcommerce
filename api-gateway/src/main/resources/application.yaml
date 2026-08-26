@@ -6,5 +6,13 @@ spring:
 
 
 app:
-  authentication-free-routes:
-    - /auth/**
+  permit-all-routes:
+    - /api/auth/login
+    - /api/auth/signup
+  authenticated-routes:
+    - /api/auth/**
+    - /api/user/**
+    - /api/order/**
+
+server:
+  port: 8083

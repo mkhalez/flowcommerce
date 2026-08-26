@@ -12,6 +12,6 @@ spring:
           jwk-set-uri: http://localhost:8081/.well-known/jwks.json
 
 user-service:
-  base-url: http://localhost:8080/api/users
+  base-url: http://localhost:8080/api/user
   connection-timeout: 3000
   read-timeout: 3000
