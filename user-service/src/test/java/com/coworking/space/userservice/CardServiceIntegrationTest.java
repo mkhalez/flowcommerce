@@ -37,6 +37,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @Import(TestcontainersConfiguration.class)
 public class CardServiceIntegrationTest {
     private static final String USER_ROUTE = "/api/user";
+    private static final String USER_REGISTER_ROUTE = "/api/user/register";
     private static final String CARD_ROUTE = "/api/user/card";
     private static final String CLEAN_CARD_TABLE = "DELETE FROM payment_cards";
     private static final String CLEAN_USER_TABLE = "DELETE FROM users";
@@ -69,13 +70,13 @@ public class CardServiceIntegrationTest {
                 "1"
         );
 
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
                                 .authorities(new SimpleGrantedAuthority("ROLE_USER")))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(userRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
@@ -93,7 +94,7 @@ public class CardServiceIntegrationTest {
                                         .claim("userId", 1)
                                         .claim("type", "access"))
                                 .authorities(new SimpleGrantedAuthority("ROLE_USER")))
-                .content(mapper.writeValueAsString(cardCreateRequest)))
+                        .content(mapper.writeValueAsString(cardCreateRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
@@ -144,7 +145,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -259,7 +260,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -323,7 +324,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -352,7 +353,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -450,7 +451,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -546,7 +547,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -613,7 +614,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -683,7 +684,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -741,7 +742,7 @@ public class CardServiceIntegrationTest {
                 "ivanov@mail.ru",
                 "1"
         );
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))

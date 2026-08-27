@@ -45,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestcontainersConfiguration.class)
 public class UserServiceIntegrationTest {
     private static final String USER_ROUTE = "/api/user";
+    private static final String USER_REGISTER_ROUTE = "/api/user/register";
     private static final String CLEAN_USER_TABLE = "DELETE FROM users";
     private static final String CARD_ROUTE = "/api/user/card";
     private static final String CLEAN_CARD_TABLE = "DELETE FROM payment_cards";
@@ -87,13 +88,13 @@ public class UserServiceIntegrationTest {
                 "1"
         );
 
-        String responseJson = mockMvc.perform(post(USER_ROUTE)
+        String responseJson = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
                                 .authorities(new SimpleGrantedAuthority("ROLE_USER")))
                         .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(request)))
+                        .content(mapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
@@ -115,7 +116,7 @@ public class UserServiceIntegrationTest {
                 "1"
         );
 
-        String response = mockMvc.perform(post(USER_ROUTE)
+        String response = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -166,7 +167,7 @@ public class UserServiceIntegrationTest {
                 "pasha@mail.ru",
                 "1"
         );
-        String response1 = mockMvc.perform(post(USER_ROUTE)
+        String response1 = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -185,9 +186,9 @@ public class UserServiceIntegrationTest {
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
                 "sasha@mail.ru",
-                "1"
+                "2"
         );
-        String response = mockMvc.perform(post(USER_ROUTE)
+        String response = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 2)
                                         .claim("type", "access"))
@@ -210,13 +211,13 @@ public class UserServiceIntegrationTest {
                 "1"
         );
 
-        mockMvc.perform(post(USER_ROUTE)
+        mockMvc.perform(post(USER_REGISTER_ROUTE)
                 .with(jwt().jwt(builder -> builder
                                 .claim("userId", 3)
                                 .claim("type", "access"))
                         .authorities(new SimpleGrantedAuthority("ROLE_USER")))
                 .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(requestToCreate3)));
+                .content(mapper.writeValueAsString(requestToCreate3)));
 
         String pageJsonResponse = mockMvc.perform(get(USER_ROUTE)
                         .param("limit", "5")
@@ -258,7 +259,7 @@ public class UserServiceIntegrationTest {
                 "pasha228@gmail.com"
         );
 
-        String response = mockMvc.perform(post(USER_ROUTE)
+        String response = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -302,7 +303,7 @@ public class UserServiceIntegrationTest {
                 "1"
         );
 
-        String response = mockMvc.perform(post(USER_ROUTE)
+        String response = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -418,7 +419,7 @@ public class UserServiceIntegrationTest {
 
 
 
-        String response = mockMvc.perform(post(USER_ROUTE)
+        String response = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
@@ -489,7 +490,7 @@ public class UserServiceIntegrationTest {
 
 
 
-        String response = mockMvc.perform(post(USER_ROUTE)
+        String response = mockMvc.perform(post(USER_REGISTER_ROUTE)
                         .with(jwt().jwt(builder -> builder
                                         .claim("userId", 1)
                                         .claim("type", "access"))
