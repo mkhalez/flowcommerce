@@ -1,9 +1,6 @@
 package com.coworking.space.authenticationservice.exceptionhandles;
 
-import com.coworking.space.authenticationservice.domain.exceptions.DisableUserException;
-import com.coworking.space.authenticationservice.domain.exceptions.RefreshTokenInvalidOrExpiredException;
-import com.coworking.space.authenticationservice.domain.exceptions.RoleNotFoundException;
-import com.coworking.space.authenticationservice.domain.exceptions.UserAlreadyExistException;
+import com.coworking.space.authenticationservice.domain.exceptions.*;
 import com.coworking.space.authenticationservice.dto.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -75,6 +72,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDisableUserException(DisableUserException e) {
         log.atError().setCause(e).log();
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(FailUserRegistration.class)
+    public ResponseEntity<ErrorResponse> habdleFailUserRegistration(FailUserRegistration e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse(e.getMessage()));
     }
 

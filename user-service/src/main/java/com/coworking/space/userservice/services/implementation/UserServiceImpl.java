@@ -45,12 +45,12 @@ public class UserServiceImpl implements UserService {
     private static final String USER_ALREADY_EXIST = "user already exist";
 
     @Override
-    public UserResponse createUser(UserCreateRequest request, String authUserId) {
-        if(userRepo.existsByAuthUserId(authUserId)) {
+    public UserResponse createUser(UserCreateRequest request) {
+        if(userRepo.existsByAuthUserId(request.getAuthId())) {
             throw new UserAlreadyExistException(USER_ALREADY_EXIST);
         }
 
-        var entity = userMapper.toUserEntity(request, authUserId);
+        var entity = userMapper.toUserEntity(request, request.getAuthId());
         var saved = userRepo.save(entity);
 
         log.atInfo().addKeyValue("create user with id", saved.getId()).log();

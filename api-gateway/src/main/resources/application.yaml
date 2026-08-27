@@ -13,6 +13,8 @@ app:
     - /api/auth/**
     - /api/user/**
     - /api/order/**
+  deny-routes:
+    - /api/user/register
 
 server:
   port: 8083

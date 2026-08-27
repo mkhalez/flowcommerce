@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration.class)
 public class ItemControllerIntegrationTest {
-    private static final String ITEM_ROUTE = "/api/item";
+    private static final String ITEM_ROUTE = "/api/order/item";
     private static final String CLEAN_ITEM_TABLE = "DELETE FROM items";
 
     @MockitoBean

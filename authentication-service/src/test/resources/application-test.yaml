@@ -14,3 +14,9 @@ security:
     roles:
       - admin
       - user
+
+client:
+  user-service:
+    base-url: http://test
+    read-timeout: 2000
+    connection-timeout: 2000

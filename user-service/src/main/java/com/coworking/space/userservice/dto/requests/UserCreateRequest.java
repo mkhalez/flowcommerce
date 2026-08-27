@@ -1,14 +1,21 @@
 package com.coworking.space.userservice.dto.requests;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-public record UserCreateRequest(
-    @NotBlank String name,
-    @NotBlank String surname,
-    @NotNull @Past LocalDate birthDay,
-    @Email String email) {}
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+public class UserCreateRequest {
+        private @NotBlank String name;
+        private @NotBlank String surname;
+        private @NotNull @Past LocalDate birthDay;
+        private @Email String email;
+        private @NotBlank String authId;
+}

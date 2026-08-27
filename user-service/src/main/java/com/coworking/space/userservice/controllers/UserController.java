@@ -26,14 +26,11 @@ public class UserController {
 
     private static final String USER_ID_CLAIM_NAME = "userId";
 
-    @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PostMapping("/register")
     public ResponseEntity<UserResponse> createUser(
-            @Valid @RequestBody UserCreateRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
+            @Valid @RequestBody UserCreateRequest request) {
 
-        String authUserId = String.valueOf(jwt.<Integer>getClaim(USER_ID_CLAIM_NAME));
-        var response = userService.createUser(request, authUserId);
+        var response = userService.createUser(request);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

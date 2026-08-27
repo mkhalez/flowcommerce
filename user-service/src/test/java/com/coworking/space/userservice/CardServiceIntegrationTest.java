@@ -36,8 +36,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration.class)
 public class CardServiceIntegrationTest {
-    private static final String USER_ROUTE = "/api/users";
-    private static final String CARD_ROUTE = "/api/cards";
+    private static final String USER_ROUTE = "/api/user";
+    private static final String CARD_ROUTE = "/api/user/card";
     private static final String CLEAN_CARD_TABLE = "DELETE FROM payment_cards";
     private static final String CLEAN_USER_TABLE = "DELETE FROM users";
 
@@ -65,7 +65,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
         String responseJson = mockMvc.perform(post(USER_ROUTE)
@@ -140,7 +141,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -254,7 +256,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -317,7 +320,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -345,7 +349,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -442,7 +447,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -537,7 +543,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -603,7 +610,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -672,7 +680,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -729,7 +738,8 @@ public class CardServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
         String responseJson = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder

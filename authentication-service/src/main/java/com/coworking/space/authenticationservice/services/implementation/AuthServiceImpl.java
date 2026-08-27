@@ -1,10 +1,8 @@
 package com.coworking.space.authenticationservice.services.implementation;
 
+import com.coworking.space.authenticationservice.clients.UserClient;
 import com.coworking.space.authenticationservice.domain.entities.UserEntity;
-import com.coworking.space.authenticationservice.domain.exceptions.RefreshTokenInvalidOrExpiredException;
-import com.coworking.space.authenticationservice.domain.exceptions.RoleNotFoundException;
-import com.coworking.space.authenticationservice.domain.exceptions.UserAlreadyExistException;
-import com.coworking.space.authenticationservice.domain.exceptions.DisableUserException;
+import com.coworking.space.authenticationservice.domain.exceptions.*;
 import com.coworking.space.authenticationservice.domain.models.Role;
 import com.coworking.space.authenticationservice.domain.models.User;
 import com.coworking.space.authenticationservice.dto.request.LoginRequest;
@@ -13,6 +11,7 @@ import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.AuthResponse;
 import com.coworking.space.authenticationservice.mapers.RoleMapper;
 import com.coworking.space.authenticationservice.mapers.UserMapper;
+import com.coworking.space.authenticationservice.mapers.UserRequestMapper;
 import com.coworking.space.authenticationservice.repositories.RoleRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import com.coworking.space.authenticationservice.services.JwtService;
@@ -46,6 +45,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final JwtDecoder decoder;
     private final AuthenticationManager authenticationManager;
+    private final UserClient userClient;
+    private final UserRequestMapper userRequestMapper;
 
     private static final String USERNAME_ALREADY_EXIST = "username already exist";
     private static final String USERNAME_NOT_FOUND = "username not found";
@@ -56,6 +57,8 @@ public class AuthServiceImpl implements AuthService {
     private static final String TOKEN_TYPE_NAME = "type";
     private static final String USER_IS_DISABLED = "user is disabled";
     private static final boolean INIT_ACTIVE = true;
+    private static final boolean INIT_DEACTIVE = false;
+    private static final String FAIL_USER_REGISTRATION_ERROR = "fail user registration error";
 
     @Override
     public AuthResponse register(SingUpRequest userRequest) {
@@ -70,29 +73,40 @@ public class AuthServiceImpl implements AuthService {
                 .username(userRequest.getUsername())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .roles(Set.of(roleEntity))
-                .active(INIT_ACTIVE)
+                .active(INIT_DEACTIVE)
                 .build();
 
         var saved = userRepo.save(userEntity);
+        try {
+            var userInfo = userRequestMapper.toUserServiceRequest(userRequest.getUserInfo(), saved.getId());
+            userClient.createUser(userInfo);
+            Set<Role> roles = saved.getRoles().stream()
+                    .map(roleMapper::toRole)
+                    .collect(Collectors.toSet());
+            User user = userMapper.toUser(saved, roles);
+            saved.setActive(INIT_ACTIVE);
+            userRepo.save(saved);
 
-        Set<Role> roles = saved.getRoles().stream()
-                .map(roleMapper::toRole)
-                .collect(Collectors.toSet());
-        User user = userMapper.toUser(saved, roles);
+            String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
+            String refreshToken = jwtService.generateRefreshToken(user.getUsername());
 
-        String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
-        String refreshToken = jwtService.generateRefreshToken(user.getUsername());
+            log.atInfo().addKeyValue("event", "registration")
+                    .addKeyValue("username", userRequest.getUsername())
+                    .log();
 
-        log.atInfo().addKeyValue("event", "registration")
-                .addKeyValue("username", userRequest.getUsername())
-                .addKeyValue("accessToken", accessToken)
-                .addKeyValue("refreshToken", refreshToken)
-                .log();
-
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+            return AuthResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+        } catch (Exception e) {
+            log.atError().setCause(e).log();
+            try {
+                userRepo.deleteById(saved.getId());
+            } catch (Exception ex) {
+                log.error("Failed to cleanup user after external client failure: {}", saved.getId(), ex);
+            }
+            throw new FailUserRegistration(FAIL_USER_REGISTRATION_ERROR);
+        }
     }
 
     @Override

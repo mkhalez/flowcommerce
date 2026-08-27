@@ -44,9 +44,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Import(TestcontainersConfiguration.class)
 public class UserServiceIntegrationTest {
-    private static final String USER_ROUTE = "/api/users";
+    private static final String USER_ROUTE = "/api/user";
     private static final String CLEAN_USER_TABLE = "DELETE FROM users";
-    private static final String CARD_ROUTE = "/api/cards";
+    private static final String CARD_ROUTE = "/api/user/card";
     private static final String CLEAN_CARD_TABLE = "DELETE FROM payment_cards";
 
     @MockitoBean
@@ -83,7 +83,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
         String responseJson = mockMvc.perform(post(USER_ROUTE)
@@ -110,7 +111,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
         String response = mockMvc.perform(post(USER_ROUTE)
@@ -161,7 +163,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "pasha@mail.ru"
+                "pasha@mail.ru",
+                "1"
         );
         String response1 = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -181,7 +184,8 @@ public class UserServiceIntegrationTest {
                 "Sasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "sasha@mail.ru"
+                "sasha@mail.ru",
+                "1"
         );
         String response = mockMvc.perform(post(USER_ROUTE)
                         .with(jwt().jwt(builder -> builder
@@ -202,7 +206,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Lopuhov",
                 LocalDate.of(1995, 6, 15),
-                "Lopuhov@mail.ru"
+                "Lopuhov@mail.ru",
+                "1"
         );
 
         mockMvc.perform(post(USER_ROUTE)
@@ -242,7 +247,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
         UserUpdateRequest requestToUpdate = new UserUpdateRequest(
@@ -292,7 +298,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
         String response = mockMvc.perform(post(USER_ROUTE)
@@ -405,7 +412,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
 
@@ -475,7 +483,8 @@ public class UserServiceIntegrationTest {
                 "Pasha",
                 "Ivanov",
                 LocalDate.of(1995, 6, 15),
-                "ivanov@mail.ru"
+                "ivanov@mail.ru",
+                "1"
         );
 
 
