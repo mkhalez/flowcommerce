@@ -6,6 +6,16 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:29093
+      - localhost:29094
+    producer.properties:
+      acks: all
+      batch.size: 1024
+      linger.ms: 2000
+
 security:
   initial:
     admin-password: ${ADMIN_PASSWORD}
