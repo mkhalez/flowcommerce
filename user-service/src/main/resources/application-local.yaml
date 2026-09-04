@@ -17,5 +17,22 @@ spring:
         jwt:
           jwk-set-uri: http://localhost:8081/.well-known/jwks.json
 
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:29093
+      - localhost:29094
+    consumer.properties:
+      enable.auto.commit: false
+      auto.offset.reset: latest
+      isolation.level: read_committed
+      fetch.min.bytes: 16
+      fetch.max.bytes: 1048576
+      fetch.max.wait.ms: 10000
+      max.poll.interval.ms: 10000
+      max.poll.records: 10
+      schema.registry.url: http://localhost:8087
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+
 auth-service:
   base-url: http://localhost:8081/internal

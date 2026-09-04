@@ -39,7 +39,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             RoleNotFoundException.class,
-            UsernameNotFoundException.class
+            UsernameNotFoundException.class,
+            RegistrationNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(Exception e) {
         log.atError().setCause(e).log();

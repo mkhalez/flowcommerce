@@ -5,7 +5,7 @@ import com.coworking.space.authenticationservice.dto.request.LoginRequest;
 import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.request.UserCreateRequest;
-import com.coworking.space.authenticationservice.dto.response.AuthResponse;
+import com.coworking.space.authenticationservice.dto.response.RegistrationStatusResponse;
 import com.coworking.space.authenticationservice.dto.response.UserResponse;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -95,7 +95,7 @@ public class AuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.refreshToken").exists())
                 .andReturn().getResponse().getContentAsString();
 
-        AuthResponse authResponse = objectMapper.readValue(responseJson, AuthResponse.class);
+        RegistrationStatusResponse authResponse = objectMapper.readValue(responseJson, RegistrationStatusResponse.class);
 
         Jwt accessJwt = jwtDecoder.decode(authResponse.getAccessToken());
         assertEquals("alex_dev", accessJwt.getSubject());
@@ -147,7 +147,7 @@ public class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(signUp)))
                 .andReturn().getResponse().getContentAsString();
 
-        AuthResponse initialTokens = objectMapper.readValue(signupResponse, AuthResponse.class);
+        RegistrationStatusResponse initialTokens = objectMapper.readValue(signupResponse, RegistrationStatusResponse.class);
 
         RefreshRequest refreshRequest = new RefreshRequest(initialTokens.getRefreshToken());
 
@@ -167,7 +167,7 @@ public class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(signUp)))
                 .andReturn().getResponse().getContentAsString();
 
-        AuthResponse tokens = objectMapper.readValue(signupResponse, AuthResponse.class);
+        RegistrationStatusResponse tokens = objectMapper.readValue(signupResponse, RegistrationStatusResponse.class);
 
         RefreshRequest invalidRefreshRequest = new RefreshRequest(tokens.getAccessToken());
 

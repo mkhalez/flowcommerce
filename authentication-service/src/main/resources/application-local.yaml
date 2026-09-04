@@ -15,6 +15,23 @@ spring:
       acks: all
       batch.size: 1024
       linger.ms: 2000
+      schema.registry.url: "http://localhost:8087"
+      value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
+      max.block.ms: 3000
+      request.timeout.ms: 3000
+      delivery.timeout.ms: 6000
+
+registration:
+  sender:
+    scheduler.fixed.delay: 2000
+    delay: 1000
+    multiplier: 2
+    max-attempts: 3
+    number-events-to-process: 10
+    kafka-cluster-timeoutSS: 6500
+    enable.idempotence: true
+    max.in.flight.requests.per.connection: 5
+    base-attempt-second-adder: 1
 
 security:
   initial:

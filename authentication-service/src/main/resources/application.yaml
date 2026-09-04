@@ -31,3 +31,5 @@ kafka:
     user-rollback-registration-topic: user-rollback-registration
     partitions: 3
     replicas: 3
+
+
