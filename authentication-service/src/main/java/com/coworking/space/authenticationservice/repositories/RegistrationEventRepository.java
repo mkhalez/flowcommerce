@@ -12,11 +12,19 @@ import java.util.UUID;
 
 public interface RegistrationEventRepository extends JpaRepository<RegistrationEventEntity, UUID> {
 
-    @Query("""
-        SELECT r from RegistrationEventEntity r 
-        WHERE r.nextAttemptAt <= :nextAttemptAt
-                AND r.status = com.coworking.space.authenticationservice.domain.statuses.RegistrationEventStatus.CREATED
-        order by r.createdAt
-        """)
-    List<RegistrationEventEntity> findEventToProcess(@Param("nextAttemptAt")OffsetDateTime nextAttemptAt, int maxAttempt, Pageable page);
+    @Query(value = """
+        SELECT * from registration_event
+        WHERE attempt_count <= :maxAttempt
+                AND (
+                    (status = 'CREATED' AND next_attempt_at < :now)
+                    OR (status = 'PRE_SENDING' AND sending_started_at <= :sendingTimeoutThreshold))
+        ORDER BY created_at
+        LIMIT :limit
+        FOR UPDATE SKIP LOCKED
+        """, nativeQuery = true)
+    List<RegistrationEventEntity> findEventToProcess(
+            @Param("now") OffsetDateTime now,
+            @Param("sendingTimeoutThreshold") OffsetDateTime sendingTimeoutThreshold,
+            @Param("maxAttempt") int maxAttempt,
+            @Param("limit") int limit);
 }

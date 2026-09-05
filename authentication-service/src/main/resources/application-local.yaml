@@ -19,19 +19,19 @@ spring:
       value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
       max.block.ms: 3000
       request.timeout.ms: 3000
-      delivery.timeout.ms: 6000
+      delivery.timeout.ms: 10000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
 
 registration:
   sender:
     scheduler.fixed.delay: 2000
     delay: 1000
-    multiplier: 2
     max-attempts: 3
-    number-events-to-process: 10
-    kafka-cluster-timeoutSS: 6500
-    enable.idempotence: true
-    max.in.flight.requests.per.connection: 5
-    base-attempt-second-adder: 1
+    limit: 10
+    baseAttemptSecond: 1
+    time-to-send-minutes: 2
+
 
 security:
   initial:

@@ -1,4 +1,4 @@
-package com.coworking.space.authenticationservice.event.registration;
+package com.coworking.space.authenticationservice.services.implementation;
 
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.RegistrationStatusResponse;
@@ -7,11 +7,11 @@ import com.coworking.space.authenticationservice.mapers.UserInfoMapper;
 import com.coworking.space.authenticationservice.services.AuthService;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class UserRegistrationWriter {
+public class UserRegistrationService {
     private final AuthService authService;
     private final KafkaAvroSerializer kafkaAvroSerializer;
     private final KafkaTopicsProperties properties;

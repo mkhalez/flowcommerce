@@ -20,6 +20,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 public class RegistrationEventEntity {
+    private static final int EXPONENTIAL_BASE = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -45,11 +47,13 @@ public class RegistrationEventEntity {
     @Column(name ="last_modified_at", nullable = false)
     private OffsetDateTime lastModifiedAt;
 
+    private OffsetDateTime sendingStartedAt;
+
     public void incrementAttemptCount() {
         attemptCount++;
     }
 
-    public void increaseNextAttemptAt(int second) {
-        nextAttemptAt = nextAttemptAt.plusSeconds(second);
+    public void increaseNextAttemptAt(int base) {
+        nextAttemptAt = nextAttemptAt.plusSeconds((int)(base * Math.pow(EXPONENTIAL_BASE, attemptCount)));
     }
 }

@@ -5,7 +5,7 @@ import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.AuthResponse;
 import com.coworking.space.authenticationservice.dto.response.RegistrationStatusResponse;
-import com.coworking.space.authenticationservice.event.registration.UserRegistrationWriter;
+import com.coworking.space.authenticationservice.services.implementation.UserRegistrationService;
 import com.coworking.space.authenticationservice.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService userService;
-    private final UserRegistrationWriter userRegistrationOutboxWriter;
+    private final UserRegistrationService userRegistrationOutboxWriter;
 
     @PostMapping("/signup")
     public ResponseEntity<RegistrationStatusResponse> register(@RequestBody @Valid SingUpRequest userRequest) {

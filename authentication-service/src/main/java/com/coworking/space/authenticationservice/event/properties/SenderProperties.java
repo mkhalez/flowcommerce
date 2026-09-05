@@ -14,9 +14,10 @@ public class SenderProperties {
     @Positive
     private int maxAttempts;
     @Positive
-    private int numberEventsToProcess;
+    private int limit;
     @Positive
-    private int kafkaClusterTimeoutSS;
+    private int baseAttemptSecond;
+
     @Positive
-    private int baseAttemptSecondAdder;
+    private int timeToSendMinutes;
 }

@@ -10,4 +10,5 @@ CREATE TABLE registration_event(
     status TEXT NOT NULL,
     attempt_count int NOT NULL,
     next_attempt_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    sending_started_at TIMESTAMP WITH TIME ZONE
 );
