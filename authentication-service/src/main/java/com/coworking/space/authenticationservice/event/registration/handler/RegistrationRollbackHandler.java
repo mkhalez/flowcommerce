@@ -1,6 +1,6 @@
-package com.coworking.space.userservice.event.registration.proccesing;
+package com.coworking.space.authenticationservice.event.registration.handler;
 
-import com.coworking.space.authenticationservice.dto.broker.avro.UserRegistrationRequest;
+import com.coworking.space.authenticationservice.dto.broker.avro.UserRegistrationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.TransientDataAccessException;
@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @KafkaListener(
         containerFactory = "avroConsumerFactory",
-        topics = "${kafka.registration-topic}"
+        topics = "${kafka.topics.user-rollback-registration-topic}"
 )
 @RetryableTopic(
         backOff =
@@ -28,17 +28,17 @@ import java.util.UUID;
                 delayString = "${kafka.topics.retry-policy.backoff.delay}",
                 multiplierString = "${kafka.topics.retry-policy.backoff.multiplier}"),
         attempts = "${kafka.topics.retry-policy.attempts}",
-        kafkaTemplate = "kafkaTemplate",
+        kafkaTemplate = "kafkaAvroTemplate",
         topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_DELAY_VALUE,
         include = {TransientDataAccessException.class, CannotCreateTransactionException.class}
-        )
+)
 @Slf4j
-public class RegistrationHandler {
-        private final RegistrationWriter registrationWriter;
+public class RegistrationRollbackHandler {
+    private final RegistrationRollbackWriter registrationRollbackWriter;
 
-        @KafkaHandler
-        public void listen(UserRegistrationRequest request,
-                           @Header(KafkaHeaders.RECEIVED_KEY) UUID id) {
-                registrationWriter.createUser(request, id);
-        }
+    @KafkaHandler
+    public void listen(UserRegistrationResult registrationResult,
+                       @Header(KafkaHeaders.RECEIVED_KEY) UUID id) {
+        registrationRollbackWriter.processResult(registrationResult, id);
+    }
 }

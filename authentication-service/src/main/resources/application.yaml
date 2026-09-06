@@ -26,10 +26,16 @@ security:
   refresh-token-minutes: 60
 
 kafka:
+  concurrentListeners: 3
+  autoStart: true
   topics:
     user-registration-topic: user-registration
     user-rollback-registration-topic: user-rollback-registration
     partitions: 3
     replicas: 3
-
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3
 

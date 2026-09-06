@@ -3,7 +3,7 @@
 
 CREATE TABLE registration_event(
     id UUID PRIMARY KEY,
-    user_id int NOT NULL references users(id),
+    user_id int references users(id),
     payload text NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL,

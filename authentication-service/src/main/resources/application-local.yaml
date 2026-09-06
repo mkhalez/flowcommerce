@@ -22,6 +22,19 @@ spring:
       delivery.timeout.ms: 10000
       enable.idempotence: true
       max.in.flight.requests.per.connection: 5
+    consumer.properties:
+      enable.auto.commit: false
+      auto.offset.reset: earliest
+      isolation.level: read_committed
+      fetch.min.bytes: 16
+      fetch.max.bytes: 1048576
+      fetch.max.wait.ms: 10000
+      max.poll.interval.ms: 50000
+      max.poll.records: 10
+      schema.registry.url: http://localhost:8087
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      specific.avro.reader: true
+      group.id: authService
 
 registration:
   sender:

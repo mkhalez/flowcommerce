@@ -1,4 +1,4 @@
-package com.coworking.space.authenticationservice.event.registration;
+package com.coworking.space.authenticationservice.event.registration.sender;
 
 import com.coworking.space.authenticationservice.domain.entities.RegistrationEventEntity;
 import com.coworking.space.authenticationservice.domain.statuses.RegistrationEventStatus;

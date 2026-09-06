@@ -11,6 +11,7 @@
     <include relativeToChangelogFile="true" file="create-table/create-users-table.sql"/>
     <include relativeToChangelogFile="true" file="create-table/create-user-roles-table.sql"/>
     <include relativeToChangelogFile="true" file="create-table/create-registration-event-table.sql"/>
+    <include relativeToChangelogFile="true" file="create-table/create-rollback-result-table.sql"/>
 
     <include relativeToChangelogFile="true" file="create-index/create-users-index.sql"/>
     <include relativeToChangelogFile="true" file="create-index/create-roles-index.sql"/>
