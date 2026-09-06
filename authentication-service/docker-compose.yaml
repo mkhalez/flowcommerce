@@ -97,6 +97,7 @@ services:
       - kafka-0
       - kafka-1
       - kafka-2
+      - schema-registry
     ports:
       - "8086:8080"
     environment:
