@@ -57,11 +57,22 @@ kafka:
       partitions: 3
       replicas: 3
       user-rollback-registration-name: user-rollback-registration-dlt
+    user-rollback-registration-topic: user-rollback-registration
     retry-policy:
       backoff:
         delay: 2000
-        multiplier: 2000
+        multiplier: 2
       attempts: 3
   concurrent-listeners: 3
   auto-start: true
   registration-topic: user-registration
+
+
+registration:
+  sender:
+    scheduler.fixed.delay: 2000
+    delay: 1000
+    max-attempts: 3
+    limit: 10
+    baseAttemptSecond: 1
+    time-to-send-minutes: 2

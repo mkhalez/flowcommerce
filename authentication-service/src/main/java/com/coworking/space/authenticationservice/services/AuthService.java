@@ -9,7 +9,7 @@ import com.coworking.space.authenticationservice.dto.response.RegistrationStatus
 import java.util.UUID;
 
 public interface AuthService {
-    RegistrationStatusResponse register(SingUpRequest user, byte[] payload);
+    RegistrationStatusResponse register(SingUpRequest user);
 
     AuthResponse authenticate(LoginRequest user);
 

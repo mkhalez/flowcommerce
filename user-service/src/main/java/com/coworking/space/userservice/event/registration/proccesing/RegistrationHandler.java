@@ -1,4 +1,4 @@
-package com.coworking.space.userservice.event.registration;
+package com.coworking.space.userservice.event.registration.proccesing;
 
 import com.coworking.space.authenticationservice.dto.broker.avro.UserRegistrationRequest;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import java.util.UUID;
                 delayString = "${kafka.topics.retry-policy.backoff.delay}",
                 multiplierString = "${kafka.topics.retry-policy.backoff.multiplier}"),
         attempts = "${kafka.topics.retry-policy.attempts}",
-        kafkaTemplate = "dlqKafkaTemplate",
+        kafkaTemplate = "kafkaTemplate",
         topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_DELAY_VALUE,
         include = {TransientDataAccessException.class, CannotCreateTransactionException.class}
         )

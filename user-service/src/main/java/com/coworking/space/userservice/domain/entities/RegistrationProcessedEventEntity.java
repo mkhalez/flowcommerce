@@ -26,8 +26,7 @@ public class RegistrationProcessedEventEntity {
     @Id
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    private UserRegistrationStatus payload;
+    private String payload;
 
     @Enumerated(EnumType.STRING)
     private RegistrationEventStatus status;

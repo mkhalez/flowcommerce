@@ -4,5 +4,6 @@ public enum RegistrationEventStatus {
     CREATED,
     PRE_SENDING,
     SEND,
-    FAIL
+    FAIL_TO_SEND,
+    FAIL_TO_PARSE
 }

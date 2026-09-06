@@ -31,14 +31,14 @@ public class RegistrationEventEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    private byte[] payload;
-
     @Enumerated(EnumType.STRING)
     private RegistrationEventStatus status;
 
     private int attemptCount;
 
     private OffsetDateTime nextAttemptAt;
+
+    private String payload;
 
     @CreatedDate
     @Column(name ="created_at", nullable = false)

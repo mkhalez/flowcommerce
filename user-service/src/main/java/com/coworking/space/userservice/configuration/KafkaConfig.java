@@ -46,11 +46,11 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<UUID, UserRegistrationRequest> dlqKafkaTemplate() {
+    public KafkaTemplate<UUID, Object> kafkaTemplate() {
         var props = kafkaProperties.buildProducerProperties();
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, UUIDSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        var factory = new DefaultKafkaProducerFactory<UUID, UserRegistrationRequest>(props);
+        var factory = new DefaultKafkaProducerFactory<UUID, Object>(props);
         return new KafkaTemplate<>(factory);
     }
 

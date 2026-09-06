@@ -76,6 +76,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(e.getMessage()));
     }
 
+    @ExceptionHandler(PayloadSerializationException.class)
+    public ResponseEntity<ErrorResponse> handlePayloadSerializationException(PayloadSerializationException e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
     @ExceptionHandler(FailUserRegistration.class)
     public ResponseEntity<ErrorResponse> habdleFailUserRegistration(FailUserRegistration e) {
         log.atError().setCause(e).log();

@@ -12,16 +12,14 @@ import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.AuthResponse;
 import com.coworking.space.authenticationservice.dto.response.RegistrationStatusResponse;
-import com.coworking.space.authenticationservice.mapers.RegistrationMapper;
-import com.coworking.space.authenticationservice.mapers.RoleMapper;
-import com.coworking.space.authenticationservice.mapers.UserMapper;
-import com.coworking.space.authenticationservice.mapers.UserRequestMapper;
+import com.coworking.space.authenticationservice.mapers.*;
 import com.coworking.space.authenticationservice.repositories.RegistrationEventRepository;
 import com.coworking.space.authenticationservice.repositories.RoleRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import com.coworking.space.authenticationservice.services.JwtService;
 import com.coworking.space.authenticationservice.services.AuthService;
 import com.coworking.space.authenticationservice.utils.CustomUserDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +33,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -55,8 +55,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final RegistrationEventRepository registrationEventRepo;
     private final RegistrationMapper registrationMapper;
-    private final UserClient userClient;
-    private final UserRequestMapper userRequestMapper;
+    private final UserInfoMapper userInfoMapper;
+    private final ObjectMapper objectMapper;
 
     private static final String USERNAME_ALREADY_EXIST = "username already exist";
     private static final String USERNAME_NOT_FOUND = "username not found";
@@ -69,10 +69,11 @@ public class AuthServiceImpl implements AuthService {
     private static final String USER_IS_DISABLED = "user is disabled";
     private static final boolean INIT_DEACTIVE = false;
     private static final int ZERO_ATTEMPT = 0;
+    private static final String PAYLOAD_SERIALIZATION_ERROR = "failed to serialize user registration payload";
 
     @Override
     @Transactional
-    public RegistrationStatusResponse register(SingUpRequest userRequest, byte[] payload) {
+    public RegistrationStatusResponse register(SingUpRequest userRequest) {
         if(userRepo.existsByUsername(userRequest.getUsername())) {
             throw new UserAlreadyExistException(USERNAME_ALREADY_EXIST);
         }
@@ -87,12 +88,21 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         var savedUser = userRepo.save(userEntity);
 
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(userInfoMapper.toPayload(
+                    userRequest.getUserInfo(), savedUser.getId()));
+        } catch (JacksonException e) {
+            throw new PayloadSerializationException(PAYLOAD_SERIALIZATION_ERROR, e);
+        }
+
+
         var registrationEventEntity = RegistrationEventEntity.builder()
                 .user(savedUser)
-                .payload(payload)
                 .status(RegistrationEventStatus.CREATED)
                 .attemptCount(ZERO_ATTEMPT)
                 .nextAttemptAt(OffsetDateTime.now())
+                .payload(payload)
                 .build();
 
         var savedRegistrationEvent = registrationEventRepo.save(registrationEventEntity);
