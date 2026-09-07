@@ -1,0 +1,41 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGODB_DB}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    ports:
+      - "8085:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  liquibase:
+    image: liquibase/liquibase:4.29
+    container_name: liquibase_payment_service_runner
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/liquibase/changelog
+    environment:
+      LIQUIBASE_COMMAND_URL: mongodb://mongodb:27017/${MONGODB_DB}?authSource=admin
+      LIQUIBASE_COMMAND_USERNAME: ${MONGODB_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${MONGODB_PASSWORD}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: changelog/changelog.xml
+    entrypoint: [ "sh", "-c" ]
+    command:
+      - |
+        curl -fsSL -o /liquibase/lib/liquibase-mongodb.jar \
+          https://repo1.maven.org/maven2/org/liquibase/ext/liquibase-mongodb/4.29.2/liquibase-mongodb-4.29.2.jar && \
+        curl -fsSL -o /liquibase/lib/mongodb-driver-sync.jar \
+          https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/5.2.0/mongodb-driver-sync-5.2.0.jar && \
+        curl -fsSL -o /liquibase/lib/mongodb-driver-core.jar \
+          https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-core/5.2.0/mongodb-driver-core-5.2.0.jar && \
+        curl -fsSL -o /liquibase/lib/bson.jar \
+          https://repo1.maven.org/maven2/org/mongodb/bson/5.2.0/bson-5.2.0.jar && \
+        liquibase update

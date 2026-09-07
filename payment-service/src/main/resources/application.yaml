@@ -1,3 +1,13 @@
 spring:
+  config:
+    import: optional:file:payment-service/.env[.properties]
   application:
     name: payment-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:8085/${MONGODB_DB}
+      username: ${MONGODB_USER}
+      password: ${MONGODB_PASSWORD}
+
+server:
+  port: 8084
