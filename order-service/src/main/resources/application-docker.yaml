@@ -10,6 +10,6 @@ spring:
           jwk-set-uri: http://auth-service:8081/.well-known/jwks.json
 
 user-service:
-  base-url: http://order-service:8082/api/users
+  base-url: http://order-service:8082/api/user
   connection-timeout: 3000
   read-timeout: 3000

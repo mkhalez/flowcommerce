@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,6 +23,7 @@ public class GlobalExceptionHandler {
     private static final String INVALID_OR_EXPIRED_TOKEN = "authentication failed: Invalid or expired token";
     private static final String UNEXPECTED_ERROR = "unexpected error occurred";
     private static final String EXTERNAL_SERVICE_UNAVAILABLE = "downstream service is temporarily unavailable, please try again later";
+    private static final String NOT_SUPPORTED_ROUTE_ERROR = "route is not supported";
 
 
     @ExceptionHandler(HttpStatusCodeException.class)
@@ -41,6 +43,13 @@ public class GlobalExceptionHandler {
         log.atError().setCause(e).log();
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ErrorResponse(NOT_SUPPORTED_ROUTE_ERROR));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

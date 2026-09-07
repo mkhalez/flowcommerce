@@ -32,7 +32,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private final RsaKeyProperties rsaKeys;
 
-    private static final String AUTH_ROUTE_PATTERN = "/auth/**";
+    private static final String AUTH_ROUTE_PATTERN = "/api/auth/**";
     private static final String PUBLIC_KEY_ROUTE = "/.well-known/jwks.json";
     private static final String INTERNAL_ROUTE_PATTERN = "/internal/**";
 

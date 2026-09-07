@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface UserService {
-    UserResponse createUser(UserCreateRequest request, String authUserId);
+    UserResponse createUser(UserCreateRequest request);
 
     UserResponse getUserById(int id);
 

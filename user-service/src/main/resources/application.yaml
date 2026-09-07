@@ -11,6 +11,10 @@ spring:
       hibernate:
         default_batch_fetch_size: 50
         format_sql: true
+
+server:
+  port: 8080
+
 cache:
   ttl-in-minutes: 10
   usersKey: user

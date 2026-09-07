@@ -23,13 +23,15 @@ public class SecurityConfig {
     private static final String TOKEN_TYPE_NAME = "type";
     private static final String VALID_TOKEN_TYPE = "access";
     private static final String EMPTY_PREFIX = "";
+    private static final String AUTHENTICATED_FREE_ROUTE = "/api/user/register";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
-                    auth.anyRequest().authenticated())
+                        auth.requestMatchers(AUTHENTICATED_FREE_ROUTE).permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> {

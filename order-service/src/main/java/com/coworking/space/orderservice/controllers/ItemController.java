@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
-@RequestMapping("api/item")
+@RequestMapping("api/order/item")
 @RequiredArgsConstructor
 @Validated
 public class ItemController {

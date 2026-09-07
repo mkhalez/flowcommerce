@@ -14,3 +14,9 @@ security:
     roles:
       - admin
       - user
+
+client:
+  user-service:
+    base-url: http://localhost:8080/api/user/register
+    read-timeout: 2000
+    connection-timeout: 2000

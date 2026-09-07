@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestcontainersConfiguration.class)
 public class OrderControllerIntegrationTest {
     private static final String ORDER_ROUTE = "/api/order";
-    private static final String ITEM_ROUTE = "/api/item";
+    private static final String ITEM_ROUTE = "/api/order/item";
     private static final String CLEAN_ORDER_ITEMS_TABLE = "DELETE FROM order_items";
     private static final String CLEAN_ORDERS_TABLE = "DELETE FROM orders";
     private static final String CLEAN_ITEMS_TABLE = "DELETE FROM items";

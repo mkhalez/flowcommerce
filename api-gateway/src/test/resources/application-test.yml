@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://test:8080/.well-known/jwks.json
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth-refresh-route
+              uri: http://test:8080
+              predicates:
+                - Path=/api/auth/refresh
+              filters:
+                - JwtClaimAuthorize=type,refresh
+
+            - id: auth-route
+              uri: http://test:8080
+              predicates:
+                - Path=/api/auth/**
+
+            - id: order-route
+              uri: http://test:8080
+              predicates:
+                - Path=/api/order/**
+              filters:
+                - JwtClaimAuthorize=type,access
+
+            - id: user-route
+              uri:  http://test:8080
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - JwtClaimAuthorize=type,access
+
+
+app:
+  permit-all-routes:
+    - /api/auth/login
+    - /api/auth/signup
+  authenticated-routes:
+    - /api/auth/**
+    - /api/user/**
+    - /api/order/**
+  deny-routes:
+    - /api/user/register
+
+server:
+  port: 8083
