@@ -1,8 +1,46 @@
 spring:
   profiles:
     default: local
+  config:
+    import: optional:file:user-service/.env[.properties]
   application:
     name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_SERVICE_URL}/.well-known/jwks.json
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth-refresh-route
+              uri: ${AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/refresh
+              filters:
+                - JwtClaimAuthorize=type,refresh
+
+            - id: auth-route
+              uri: ${AUTH_SERVICE_URL}
+              predicates:
+                - Path=/api/auth/**
+
+            - id: order-route
+              uri: ${ORDER_SERVICE_URL}
+              predicates:
+                - Path=/api/order/**
+              filters:
+                - JwtClaimAuthorize=type,access
+
+            - id: user-route
+              uri: ${USER_SERVICE_URL}
+              predicates:
+                - Path=/api/user/**
+              filters:
+                - JwtClaimAuthorize=type,access
 
 
 app:
