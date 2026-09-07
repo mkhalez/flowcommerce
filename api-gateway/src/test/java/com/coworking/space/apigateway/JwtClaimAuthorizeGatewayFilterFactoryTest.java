@@ -10,6 +10,7 @@ import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import tools.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class JwtClaimAuthorizeGatewayFilterFactoryTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final JwtClaimAuthorizeGatewayFilterFactory factory = new JwtClaimAuthorizeGatewayFilterFactory(objectMapper);
