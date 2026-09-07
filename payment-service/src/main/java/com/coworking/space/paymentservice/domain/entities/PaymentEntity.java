@@ -5,6 +5,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
+
 @Document("payments")
 public class PaymentEntity {
     @Id
@@ -15,6 +17,8 @@ public class PaymentEntity {
     private Integer userId;
 
     private PaymentStatus status;
+
+    private Instant timestamp;
 
     private int paymentAmount;
 }

@@ -15,8 +15,11 @@
                     validator: {
                         $jsonSchema: {
                             bsonType: "object",
-                            required: ["order_id", "user_id", "status", "timestamp", "payment_amount"],
+                            required: ["_id", "order_id", "user_id", "status", "timestamp", "payment_amount"],
                             properties: {
+                                _id: {
+                                    bsonType: "objectId"
+                                }
                                 order_id: {
                                     bsonType: "int"
                                 },
