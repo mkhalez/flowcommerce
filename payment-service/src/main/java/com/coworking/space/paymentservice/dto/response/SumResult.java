@@ -1,12 +1,12 @@
-package com.coworking.space.paymentservice.dto.mongodb;
+package com.coworking.space.paymentservice.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @NoArgsConstructor
 @Getter
+@AllArgsConstructor
 public class SumResult {
     private Double sum;
 }

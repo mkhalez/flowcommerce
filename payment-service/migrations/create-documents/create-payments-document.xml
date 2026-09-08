@@ -34,7 +34,10 @@
                                 },
                                 payment_amount: {
                                     bsonType: "double"
-                                }
+                                },
+                                pending_boundary: {
+                                    bsonType: "date"
+                                },
                             }
                         }
                     },

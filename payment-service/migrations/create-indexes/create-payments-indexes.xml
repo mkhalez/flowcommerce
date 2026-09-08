@@ -14,7 +14,7 @@
                 { order_id: 1 }
             </mongodb:keys>
             <mongodb:options>
-                {name: "order_id_payments_index"}
+                {unique: true, name: "order_id_payments_index"}
             </mongodb:options>
         </mongodb:createIndex>
     </changeSet>

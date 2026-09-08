@@ -2,7 +2,7 @@ package com.coworking.space.paymentservice.repositories.implementation;
 
 import com.coworking.space.paymentservice.domain.entities.PaymentEntity;
 import com.coworking.space.paymentservice.domain.statuses.PaymentStatus;
-import com.coworking.space.paymentservice.dto.mongodb.SumResult;
+import com.coworking.space.paymentservice.dto.response.SumResult;
 import com.coworking.space.paymentservice.repositories.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -46,10 +47,11 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public List<PaymentEntity> findByOrderId(int orderId) {
+    public Optional<PaymentEntity> findByOrderId(int orderId) {
         var orderIdCriteria = Criteria.where(ORDER_ID_KEY).eq(orderId);
         Query query = new Query(orderIdCriteria);
-        return mongoTemplate.find(query, PaymentEntity.class);
+        var entity = mongoTemplate.findOne(query, PaymentEntity.class);
+        return Optional.ofNullable(entity);
     }
 
     @Override
@@ -60,14 +62,14 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public boolean existsById(ObjectId id) {
-        var idCriteria = Criteria.where(ID_KEY).eq(id);
+    public boolean existsByOrderId(int orderId) {
+        var idCriteria = Criteria.where(ORDER_ID_KEY).eq(orderId);
         Query query = new Query(idCriteria);
         return mongoTemplate.exists(query, Boolean.class);
     }
 
     @Override
-    public double getSumByUser(Instant from, Instant to, int userId) {
+    public SumResult getSumByUser(Instant from, Instant to, int userId) {
         MatchOperation filter = Aggregation.match(
                 Criteria.where(TIMESTAMP_KEY).gte(from).lte(to)
                         .and(USER_ID_KEY).eq(userId));
@@ -76,14 +78,14 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public double getTotalSum(Instant from, Instant to) {
+    public SumResult getTotalSum(Instant from, Instant to) {
         MatchOperation filter = Aggregation.match(
                 Criteria.where(TIMESTAMP_KEY).gte(from).lte(to));
 
         return getSum(filter);
     }
 
-    private double getSum(MatchOperation matchOperation) {
+    private SumResult getSum(MatchOperation matchOperation) {
         GroupOperation group = Aggregation.group().sum(PAYMENT_AMOUNT_KEY).as(SUM_KEY);
         Aggregation aggregation = Aggregation.newAggregation(matchOperation, group);
         AggregationResults<SumResult> results = mongoTemplate.aggregate(
@@ -92,6 +94,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                 SumResult.class);
 
         SumResult sumResult = results.getUniqueMappedResult();
-        return sumResult == null ? ZERO_SUM : sumResult.getSum();
+        return sumResult == null ? new SumResult(ZERO_SUM) : sumResult;
     }
 }

@@ -2,6 +2,7 @@ package com.coworking.space.paymentservice.repositories;
 
 import com.coworking.space.paymentservice.domain.entities.PaymentEntity;
 import com.coworking.space.paymentservice.domain.statuses.PaymentStatus;
+import com.coworking.space.paymentservice.dto.response.SumResult;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
@@ -13,13 +14,13 @@ public interface PaymentRepository {
 
     List<PaymentEntity> findByUserId(int userId);
 
-    List<PaymentEntity> findByOrderId(int orderId);
+    Optional<PaymentEntity> findByOrderId(int orderId);
 
     List<PaymentEntity> findByStatus(PaymentStatus status);
 
-    double getSumByUser(Instant from, Instant to, int userId);
+    SumResult getSumByUser(Instant from, Instant to, int userId);
 
-    double getTotalSum(Instant from, Instant to);
+    SumResult getTotalSum(Instant from, Instant to);
 
-    boolean existsById(ObjectId id);
+    boolean existsByOrderId(int orderId);
 }
