@@ -30,5 +30,5 @@ public class PaymentEntity {
 
     private Instant pendingBoundary;
 
-    private int paymentAmount;
+    private double paymentAmount;
 }
