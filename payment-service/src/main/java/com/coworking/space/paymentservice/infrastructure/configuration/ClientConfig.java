@@ -1,17 +1,13 @@
-package com.coworking.space.orderservice.configuration;
+package com.coworking.space.paymentservice.infrastructure.configuration;
 
-import com.coworking.space.orderservice.clients.UserServiceClient;
-import com.coworking.space.orderservice.properties.ClientProperties;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import com.coworking.space.paymentservice.clients.OrderServiceClient;
+import com.coworking.space.paymentservice.infrastructure.properties.ClientProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
@@ -23,9 +19,8 @@ import java.time.Duration;
 @Configuration
 public class ClientConfig {
     @Bean
-    public UserServiceClient userServiceClient(ClientHttpRequestInterceptor jwtInterceptor,
-                                               ClientProperties clientProperties) {
-
+    public OrderServiceClient userServiceClient(ClientHttpRequestInterceptor jwtInterceptor,
+                                                ClientProperties clientProperties) {
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(clientProperties.getConnectionTimeout()))
                 .build();
@@ -43,7 +38,7 @@ public class ClientConfig {
         HttpServiceProxyFactory httpServiceProxyFactory =
                 HttpServiceProxyFactory.builderFor(adapter).build();
 
-        return httpServiceProxyFactory.createClient(UserServiceClient.class);
+        return httpServiceProxyFactory.createClient(OrderServiceClient.class);
     }
 
     @Bean
