@@ -14,6 +14,7 @@ import org.apache.kafka.common.serialization.UUIDSerializer;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -30,6 +31,7 @@ import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("!test")
 public class KafkaConfig {
     private final KafkaProperties kafkaProperties;
     private final KafkaConsumerProperties kafkaConsumerProperties;

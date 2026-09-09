@@ -4,8 +4,10 @@ import com.coworking.space.authenticationservice.infrustructure.properties.Kafka
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaAdmin;
 
+@Profile("!test")
 @Configuration
 public class KafkaTopicsConfig {
     @Bean

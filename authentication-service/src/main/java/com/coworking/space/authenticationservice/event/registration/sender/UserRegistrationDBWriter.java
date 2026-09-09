@@ -6,6 +6,7 @@ import com.coworking.space.authenticationservice.event.properties.SenderProperti
 import com.coworking.space.authenticationservice.repositories.RegistrationEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.errors.RetriableException;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Profile("!test")
 @Service
 @RequiredArgsConstructor
 public class UserRegistrationDBWriter {

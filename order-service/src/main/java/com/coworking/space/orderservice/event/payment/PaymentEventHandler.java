@@ -4,6 +4,7 @@ import com.coworking.space.paymentservice.dto.broker.avro.PaymentOrderEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -15,6 +16,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.CannotCreateTransactionException;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 @KafkaListener(

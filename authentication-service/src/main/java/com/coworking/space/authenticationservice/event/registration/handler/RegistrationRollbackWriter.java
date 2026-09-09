@@ -8,6 +8,7 @@ import com.coworking.space.authenticationservice.repositories.RegistrationEventR
 import com.coworking.space.authenticationservice.repositories.RollbackRegistrationResultRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 public class RegistrationRollbackWriter {

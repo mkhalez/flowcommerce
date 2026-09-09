@@ -3,6 +3,7 @@ package com.coworking.space.authenticationservice.event.registration.handler;
 import com.coworking.space.authenticationservice.dto.broker.avro.UserRegistrationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -16,6 +17,7 @@ import org.springframework.transaction.CannotCreateTransactionException;
 
 import java.util.UUID;
 
+@Profile("!test")
 @Component
 @RequiredArgsConstructor
 @KafkaListener(

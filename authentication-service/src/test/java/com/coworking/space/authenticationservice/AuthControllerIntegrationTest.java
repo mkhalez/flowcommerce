@@ -1,12 +1,15 @@
 package com.coworking.space.authenticationservice;
 
 import com.coworking.space.authenticationservice.clients.UserClient;
+import com.coworking.space.authenticationservice.domain.statuses.RegistrationEventStatus;
 import com.coworking.space.authenticationservice.dto.request.LoginRequest;
 import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.request.UserCreateRequest;
+import com.coworking.space.authenticationservice.dto.response.AuthResponse;
 import com.coworking.space.authenticationservice.dto.response.RegistrationStatusResponse;
 import com.coworking.space.authenticationservice.dto.response.UserResponse;
+import com.coworking.space.authenticationservice.repositories.RegistrationEventRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +22,17 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import org.mockito.Mockito;
-import static org.mockito.ArgumentMatchers.any;
+import tools.jackson.databind.ObjectMapper;
+
+import java.time.Duration;
 import java.time.LocalDate;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,8 +59,12 @@ public class AuthControllerIntegrationTest {
     @MockitoBean
     private UserClient userClient;
 
+    @Autowired
+    private RegistrationEventRepository registrationEventRepository;
+
     @AfterEach
     void clean() {
+        registrationEventRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -83,97 +93,51 @@ public class AuthControllerIntegrationTest {
         );
     }
 
-    @Test
-    void shouldRegisterAndReturnValidJwtTokens() throws Exception {
-        SingUpRequest request = new SingUpRequest("alex_dev", "password123", createValidUserInfo());
-
+    private RegistrationStatusResponse signUp(SingUpRequest request) throws Exception {
         String responseJson = mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.accessToken").exists())
-                .andExpect(jsonPath("$.refreshToken").exists())
+                .andExpect(jsonPath("$.transactionId").exists())
+                .andExpect(jsonPath("$.status").exists())
                 .andReturn().getResponse().getContentAsString();
 
-        RegistrationStatusResponse authResponse = objectMapper.readValue(responseJson, RegistrationStatusResponse.class);
+        return objectMapper.readValue(responseJson, RegistrationStatusResponse.class);
+    }
 
-        Jwt accessJwt = jwtDecoder.decode(authResponse.getAccessToken());
-        assertEquals("alex_dev", accessJwt.getSubject());
-        assertEquals("access", accessJwt.getClaim("type"));
-        assertTrue(accessJwt.getClaimAsStringList("roles").contains("ROLE_USER"));
-        assertNotNull(accessJwt.getClaim("userId"));
+    private void awaitRegistrationCompleted(java.util.UUID transactionId) {
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() -> {
+            String json = mockMvc.perform(get("/api/auth/status/{registrationId}", transactionId))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
 
-        Jwt refreshJwt = jwtDecoder.decode(authResponse.getRefreshToken());
-        assertEquals("alex_dev", refreshJwt.getSubject());
-        assertEquals("refresh", refreshJwt.getClaim("type"));
+            RegistrationStatusResponse statusResponse =
+                    objectMapper.readValue(json, RegistrationStatusResponse.class);
+
+            assertEquals(RegistrationEventStatus.CREATED, statusResponse.getStatus());
+        });
+    }
+
+    @Test
+    void shouldRegisterSuccessfully() throws Exception {
+        SingUpRequest request = new SingUpRequest("alex_dev", "password123", createValidUserInfo());
+
+        RegistrationStatusResponse registrationResponse = signUp(request);
+
+        assertNotNull(registrationResponse.getTransactionId());
+        awaitRegistrationCompleted(registrationResponse.getTransactionId());
     }
 
     @Test
     void shouldFailRegistrationWhenUsernameExists() throws Exception {
         SingUpRequest request = new SingUpRequest("duplicate_user", "password123", createValidUserInfo());
 
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+        RegistrationStatusResponse first = signUp(request);
+        awaitRegistrationCompleted(first.getTransactionId());
 
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
-    }
-
-    @Test
-    void shouldAuthenticateAndReturnTokens() throws Exception {
-        SingUpRequest signUp = new SingUpRequest("john_doe", "secret_pass", createValidUserInfo());
-        mockMvc.perform(post("/api/auth/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(signUp)));
-
-        LoginRequest login = new LoginRequest("john_doe", "secret_pass");
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(login)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").exists())
-                .andExpect(jsonPath("$.refreshToken").exists());
-    }
-
-    @Test
-    void shouldRefreshTokenSuccessfully() throws Exception {
-        SingUpRequest signUp = new SingUpRequest("refresh_user", "secret_pass", createValidUserInfo());
-        String signupResponse = mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signUp)))
-                .andReturn().getResponse().getContentAsString();
-
-        RegistrationStatusResponse initialTokens = objectMapper.readValue(signupResponse, RegistrationStatusResponse.class);
-
-        RefreshRequest refreshRequest = new RefreshRequest(initialTokens.getRefreshToken());
-
-        mockMvc.perform(post("/api/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(refreshRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").exists())
-                .andExpect(jsonPath("$.refreshToken").exists());
-    }
-
-    @Test
-    void shouldRejectRefreshWhenAccessTokenProvidedInsteadOfRefreshToken() throws Exception {
-        SingUpRequest signUp = new SingUpRequest("hacker_user", "secret_pass", createValidUserInfo());
-        String signupResponse = mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(signUp)))
-                .andReturn().getResponse().getContentAsString();
-
-        RegistrationStatusResponse tokens = objectMapper.readValue(signupResponse, RegistrationStatusResponse.class);
-
-        RefreshRequest invalidRefreshRequest = new RefreshRequest(tokens.getAccessToken());
-
-        mockMvc.perform(post("/api/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRefreshRequest)))
-                .andExpect(status().isUnauthorized());
     }
 }

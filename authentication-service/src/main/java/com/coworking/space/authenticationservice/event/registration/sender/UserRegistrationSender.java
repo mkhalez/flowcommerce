@@ -9,6 +9,7 @@ import com.coworking.space.authenticationservice.mapers.UserInfoMapper;
 import com.coworking.space.authenticationservice.repositories.RegistrationEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
+@Profile("!test")
 @Slf4j
 @Component
 @RequiredArgsConstructor
