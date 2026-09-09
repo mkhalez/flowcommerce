@@ -43,3 +43,8 @@ kafka:
     replicas: 3
     payment-operations-result-topic: payment-operations-result
     payment-operations-result-topic-dlq: payment-operations-result
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3
