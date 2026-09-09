@@ -1,10 +1,7 @@
 package com.coworking.space.orderservice.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,6 +15,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 public class PaymentEventEntity {
     @Id
     private String id;

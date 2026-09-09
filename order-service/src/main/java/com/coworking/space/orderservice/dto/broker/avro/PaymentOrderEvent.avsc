@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "PaymentOrderEvent",
-  "namespace": "com.coworking.space.orderservice.dto.broker.avro",
+  "namespace": "com.coworking.space.paymentservice.dto.broker.avro",
   "fields": [
     {
       "name": "orderId",

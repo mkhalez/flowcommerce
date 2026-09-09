@@ -1,6 +1,6 @@
 package com.coworking.space.orderservice.event.payment;
 
-import com.coworking.space.orderservice.dto.broker.avro.PaymentOrderEvent;
+import com.coworking.space.paymentservice.dto.broker.avro.PaymentOrderEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;

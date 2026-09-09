@@ -36,6 +36,12 @@ user-service:
   read-timeout: 3000
 
 kafka:
+  topics:
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3
   concurrent-listeners: 3
   auto-start: true
   payment-operations-result-topic: payment-operations-result

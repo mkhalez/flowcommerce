@@ -2,10 +2,10 @@ package com.coworking.space.orderservice.event.payment;
 
 import com.coworking.space.orderservice.domain.entities.PaymentEventEntity;
 import com.coworking.space.orderservice.domain.enums.Status;
-import com.coworking.space.orderservice.dto.broker.avro.PaymentOrderEvent;
-import com.coworking.space.orderservice.dto.broker.avro.RegistrationStatus;
 import com.coworking.space.orderservice.repositories.OrderRepository;
 import com.coworking.space.orderservice.repositories.PaymentEventRepository;
+import com.coworking.space.paymentservice.dto.broker.avro.PaymentOrderEvent;
+import com.coworking.space.paymentservice.dto.broker.avro.RegistrationStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
