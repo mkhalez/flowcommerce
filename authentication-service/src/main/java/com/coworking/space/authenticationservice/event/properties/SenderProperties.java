@@ -1,0 +1,25 @@
+package com.coworking.space.authenticationservice.event.properties;
+
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Profile;
+import org.springframework.validation.annotation.Validated;
+
+@Profile("!test")
+@ConfigurationProperties(prefix = "registration.sender")
+@AllArgsConstructor
+@Validated
+@Getter
+public class SenderProperties {
+    @Positive
+    private int maxAttempts;
+    @Positive
+    private int limit;
+    @Positive
+    private int baseAttemptSecond;
+
+    @Positive
+    private int timeToSendMinutes;
+}

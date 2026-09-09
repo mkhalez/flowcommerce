@@ -1,0 +1,50 @@
+spring:
+  profiles:
+    default: local
+  config:
+    import: optional:file:payment-service/.env[.properties]
+  application:
+    name: payment-service
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:29093
+      - localhost:29094
+    producer.properties:
+      acks: all
+      batch.size: 1024
+      linger.ms: 2000
+      schema.registry.url: "http://localhost:8087"
+      value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
+      max.block.ms: 3000
+      request.timeout.ms: 3000
+      delivery.timeout.ms: 10000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
+
+server:
+  port: 8084
+
+payment-creation:
+  minutesDelta: 3
+
+payment:
+  sender:
+    scheduler.fixed.delay: 5000
+    max-attempts: 3
+    limit: 10
+    base-attempt-second: 2
+    time-to-send-minutes: 2
+
+
+kafka:
+  topics:
+    partitions: 3
+    replicas: 3
+    payment-operations-result-topic: payment-operations-result
+    payment-operations-result-topic-dlq: payment-operations-result-dlq
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3

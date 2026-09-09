@@ -6,6 +6,46 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:29093
+      - localhost:29094
+    producer.properties:
+      acks: all
+      batch.size: 1024
+      linger.ms: 2000
+      schema.registry.url: "http://localhost:8087"
+      value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
+      max.block.ms: 3000
+      request.timeout.ms: 3000
+      delivery.timeout.ms: 10000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
+    consumer.properties:
+      enable.auto.commit: false
+      auto.offset.reset: earliest
+      isolation.level: read_committed
+      fetch.min.bytes: 16
+      fetch.max.bytes: 1048576
+      fetch.max.wait.ms: 10000
+      max.poll.interval.ms: 50000
+      max.poll.records: 10
+      schema.registry.url: http://localhost:8087
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      specific.avro.reader: true
+      group.id: authService
+
+registration:
+  sender:
+    scheduler.fixed.delay: 2000
+    delay: 1000
+    max-attempts: 3
+    limit: 10
+    baseAttemptSecond: 1
+    time-to-send-minutes: 2
+
+
 security:
   initial:
     admin-password: ${ADMIN_PASSWORD}

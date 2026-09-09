@@ -17,5 +17,62 @@ spring:
         jwt:
           jwk-set-uri: http://localhost:8081/.well-known/jwks.json
 
+  kafka:
+    bootstrap-servers:
+      - localhost:29092
+      - localhost:29093
+      - localhost:29094
+    consumer.properties:
+      enable.auto.commit: false
+      auto.offset.reset: earliest
+      isolation.level: read_committed
+      fetch.min.bytes: 16
+      fetch.max.bytes: 1048576
+      fetch.max.wait.ms: 10000
+      max.poll.interval.ms: 50000
+      max.poll.records: 10
+      schema.registry.url: http://localhost:8087
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      specific.avro.reader: true
+      group.id: userService
+    producer.properties:
+      acks: all
+      batch.size: 1024
+      linger.ms: 2000
+      schema.registry.url: "http://localhost:8087"
+      value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
+      max.block.ms: 3000
+      request.timeout.ms: 3000
+      delivery.timeout.ms: 10000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
+
 auth-service:
   base-url: http://localhost:8081/internal
+
+kafka:
+  topics:
+    dlq:
+      user-registration-name: user-registration-dlt
+      partitions: 3
+      replicas: 3
+      user-rollback-registration-name: user-rollback-registration-dlt
+    user-rollback-registration-topic: user-rollback-registration
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3
+  concurrent-listeners: 3
+  auto-start: true
+  registration-topic: user-registration
+
+
+registration:
+  sender:
+    scheduler.fixed.delay: 2000
+    delay: 1000
+    max-attempts: 3
+    limit: 10
+    baseAttemptSecond: 1
+    time-to-send-minutes: 2

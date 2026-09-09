@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "UserRegistrationResult",
+  "namespace": "com.coworking.space.authenticationservice.dto.broker.avro",
+  "fields": [
+    {
+      "name": "message",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "RegistrationStatus",
+        "symbols": ["SUCCESS", "FAIL"]
+      }
+    }
+  ]
+}

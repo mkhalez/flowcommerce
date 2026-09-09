@@ -23,7 +23,9 @@ import java.time.Duration;
 @Configuration
 public class ClientConfig {
     @Bean
-    public UserServiceClient userServiceClient(ClientHttpRequestInterceptor jwtInterceptor, ClientProperties clientProperties) {
+    public UserServiceClient userServiceClient(ClientHttpRequestInterceptor jwtInterceptor,
+                                               ClientProperties clientProperties) {
+
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(clientProperties.getConnectionTimeout()))
                 .build();
