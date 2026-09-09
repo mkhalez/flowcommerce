@@ -12,7 +12,7 @@ import com.coworking.space.paymentservice.infrastructure.properties.PaymentCreat
 import com.coworking.space.paymentservice.mappers.PaymentMapper;
 import com.coworking.space.paymentservice.repositories.PaymentRepository;
 import com.coworking.space.paymentservice.services.PaymentService;
-import com.coworking.space.paymentservice.services.util.PaymentEventWriter;
+import com.coworking.space.paymentservice.services.util.PaymentEventAndOperationWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -32,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderServiceClient orderServiceClient;
     private final PaymentCreationProperties paymentCreationProperties;
     private final BankServiceImpl bankService;
-    private final PaymentEventWriter paymentEventWriter;
+    private final PaymentEventAndOperationWriter paymentEventWriter;
 
     private static final String PAYMENT_NOT_FOUND_EXCEPTION = "payment not found exception";
     private static final String PAYMENT_IN_PENDING_STATUS = "payment in pending status";

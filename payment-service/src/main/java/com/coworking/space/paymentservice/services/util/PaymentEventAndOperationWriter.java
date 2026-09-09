@@ -3,7 +3,6 @@ package com.coworking.space.paymentservice.services.util;
 import com.coworking.space.paymentservice.domain.entities.PaymentEntity;
 import com.coworking.space.paymentservice.domain.entities.PaymentEventEntity;
 import com.coworking.space.paymentservice.domain.statuses.PaymentEventStatus;
-import com.coworking.space.paymentservice.domain.statuses.PaymentStatus;
 import com.coworking.space.paymentservice.repositories.PaymentEventRepository;
 import com.coworking.space.paymentservice.repositories.PaymentRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,7 @@ import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
-public class PaymentEventWriter {
+public class PaymentEventAndOperationWriter {
     private final PaymentRepository paymentRepo;
     private final PaymentEventRepository paymentEventRepo;
 

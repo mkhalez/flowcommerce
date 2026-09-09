@@ -5,7 +5,6 @@ import com.coworking.space.paymentservice.domain.statuses.PaymentStatus;
 import com.coworking.space.paymentservice.dto.broker.avro.PaymentOrderEvent;
 import com.coworking.space.paymentservice.dto.broker.avro.RegistrationStatus;
 import com.coworking.space.paymentservice.infrastructure.properties.KafkaTopicsProperties;
-import com.coworking.space.paymentservice.repositories.PaymentEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;

@@ -1,6 +1,5 @@
 package com.coworking.space.paymentservice.repositories.implementation;
 
-import com.coworking.space.paymentservice.domain.entities.PaymentEntity;
 import com.coworking.space.paymentservice.domain.entities.PaymentEventEntity;
 import com.coworking.space.paymentservice.domain.statuses.PaymentEventStatus;
 import com.coworking.space.paymentservice.infrastructure.properties.PaymentSenderProperties;
@@ -31,6 +30,7 @@ public class PaymentEventRepositoryImpl implements PaymentEventRepository {
     private static final String NEXT_ATTEMPT_AT_KEY = "next_attempt_at";
     private static final String CREATED_AT_KEY = "created_at";
     private static final String ID_KEY = "_id";
+    private static final int INCREMENT_BY_ONE = 1;
 
     @Override
     public PaymentEventEntity save(PaymentEventEntity entity) {
@@ -51,25 +51,52 @@ public class PaymentEventRepositoryImpl implements PaymentEventRepository {
         Criteria statusOr = new Criteria().orOperator(createdBranch, pendingBranch);
 
         Criteria attemptCountFilter = Criteria.where(ATTEMPT_COUNT_KEY).lte(paymentSenderProperties.getMaxAttempts());
-
         Criteria fullFilter = new Criteria().andOperator(attemptCountFilter, statusOr);
 
         Query query = new Query(fullFilter)
                 .with(Sort.by(Sort.Direction.ASC, CREATED_AT_KEY))
                 .limit(paymentSenderProperties.getLimit());
 
-        List<ObjectId> ids =  mongoTemplate.find(query, PaymentEventEntity.class).stream()
-                .map(PaymentEventEntity::getId)
-                .toList();
+        List<PaymentEventEntity> candidates = mongoTemplate.find(query, PaymentEventEntity.class);
 
-        if(ids.isEmpty()) {
+        if (candidates.isEmpty()) {
             return List.of();
         }
 
-        Update update = new Update().set(EVENT_STATUS_KEY, PaymentEventStatus.PENDING).set(SENDING_STARTED_AT_KEY, now);
-        mongoTemplate.updateMulti(query, update, PaymentEventEntity.class);
+        int maxAttempts = paymentSenderProperties.getMaxAttempts();
 
-        Criteria reallyUpdatedFilter = Criteria.where(ID_KEY).in(ids)
+        List<ObjectId> idsToFail = candidates.stream()
+                .filter(e -> e.getAttemptCount() >= maxAttempts)
+                .map(PaymentEventEntity::getId)
+                .toList();
+
+        List<ObjectId> idsToSend = candidates.stream()
+                .filter(e -> e.getAttemptCount() < maxAttempts)
+                .map(PaymentEventEntity::getId)
+                .toList();
+
+        if (!idsToFail.isEmpty()) {
+            Criteria failIdsCriteria = Criteria.where(ID_KEY).in(idsToFail);
+            Criteria failIdsWithStatusCriteria = new Criteria().andOperator(failIdsCriteria, statusOr);
+            Query queryToFail = new Query(failIdsWithStatusCriteria);
+            Update updateToFail = new Update().set(EVENT_STATUS_KEY, PaymentEventStatus.FAIL_TO_SEND);
+            mongoTemplate.updateMulti(queryToFail, updateToFail, PaymentEventEntity.class);
+        }
+
+        if (idsToSend.isEmpty()) {
+            return List.of();
+        }
+
+        Criteria sendIdsCriteria = Criteria.where(ID_KEY).in(idsToSend);
+        Criteria sendIdsWithStatusCriteria = new Criteria().andOperator(sendIdsCriteria, statusOr);
+        Query queryToSend = new Query(sendIdsWithStatusCriteria);
+        Update updateToSend = new Update()
+                .set(EVENT_STATUS_KEY, PaymentEventStatus.PENDING)
+                .set(SENDING_STARTED_AT_KEY, now)
+                .inc(ATTEMPT_COUNT_KEY, INCREMENT_BY_ONE);
+        mongoTemplate.updateMulti(queryToSend, updateToSend, PaymentEventEntity.class);
+
+        Criteria reallyUpdatedFilter = Criteria.where(ID_KEY).in(idsToSend)
                 .and(SENDING_STARTED_AT_KEY).is(now);
 
         Query reallyUpdatedQuery = new Query(reallyUpdatedFilter);
