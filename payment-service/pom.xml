@@ -164,7 +164,7 @@
                             <goal>schema</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>${project.basedir}/src/main/java/com/coworking/space/authenticationservice/dto/broker/avro</sourceDirectory>
+                            <sourceDirectory>${project.basedir}/src/main/java/com/coworking/space/paymentservice/dto/broker/avro</sourceDirectory>
                             <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>
                         </configuration>
                     </execution>

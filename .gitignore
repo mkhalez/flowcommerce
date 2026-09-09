@@ -58,4 +58,5 @@ payment-service/.mvn
 payment-service/mvnw.cmd
 payment-service/.env
 payment-service/mvnw
+payment-service/mongo-keyfile
 

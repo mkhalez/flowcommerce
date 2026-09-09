@@ -96,7 +96,6 @@ public class AuthServiceImpl implements AuthService {
             throw new PayloadSerializationException(PAYLOAD_SERIALIZATION_ERROR, e);
         }
 
-
         var registrationEventEntity = RegistrationEventEntity.builder()
                 .user(savedUser)
                 .status(RegistrationEventStatus.CREATED)
@@ -111,55 +110,6 @@ public class AuthServiceImpl implements AuthService {
                 .status(savedRegistrationEvent.getStatus())
                 .build();
     }
-
-//        @Override
-//    public AuthResponse register(SingUpRequest userRequest) {
-//        if(userRepo.existsByUsername(userRequest.getUsername())) {
-//            throw new UserAlreadyExistException(USERNAME_ALREADY_EXIST);
-//        }
-//
-//        var roleEntity = roleRepo.findByName(USER_ROLE_NAME)
-//                .orElseThrow(() -> new RoleNotFoundException(ROLE_NOT_FOUND));
-//
-//        var userEntity = UserEntity.builder()
-//                .username(userRequest.getUsername())
-//                .password(passwordEncoder.encode(userRequest.getPassword()))
-//                .roles(Set.of(roleEntity))
-//                .active(INIT_DEACTIVE)
-//                .build();
-//
-//        var saved = userRepo.save(userEntity);
-//        try {
-//            var userInfo = userRequestMapper.toUserServiceRequest(userRequest.getUserInfo(), saved.getId());
-//            userClient.createUser(userInfo);
-//            Set<Role> roles = saved.getRoles().stream()
-//                    .map(roleMapper::toRole)
-//                    .collect(Collectors.toSet());
-//            saved.setActive(INIT_ACTIVE);
-//            saved = userRepo.save(saved);
-//
-//            User user = userMapper.toUser(saved, roles);
-//            String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
-//            String refreshToken = jwtService.generateRefreshToken(user.getUsername());
-//
-//            log.atInfo().addKeyValue("event", "registration")
-//                    .addKeyValue("username", userRequest.getUsername())
-//                    .log();
-//
-//            return AuthResponse.builder()
-//                    .accessToken(accessToken)
-//                    .refreshToken(refreshToken)
-//                    .build();
-//        } catch (Exception e) {
-//            log.atError().setCause(e).log();
-//            try {
-//                userRepo.deleteById(saved.getId());
-//            } catch (Exception ex) {
-//                log.error("Failed to cleanup user after external client failure: {}", saved.getId(), ex);
-//            }
-//            throw new FailUserRegistration(FAIL_USER_REGISTRATION_ERROR);
-//        }
-//    }
 
     @Override
     public AuthResponse authenticate(LoginRequest userRequest) {

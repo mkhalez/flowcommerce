@@ -8,6 +8,7 @@
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <include relativeToChangelogFile="true" file="create-documents/create-payments-document.xml"/>
+    <include relativeToChangelogFile="true" file="create-documents/create-payment-events-documet.xml"/>
 
     <include relativeToChangelogFile="true" file="create-indexes/create-payments-indexes.xml"/>
 

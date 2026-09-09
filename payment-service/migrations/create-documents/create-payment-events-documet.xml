@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:mongodb="http://www.liquibase.org/xml/ns/mongodb"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+         http://www.liquibase.org/xml/ns/mongodb
+         http://www.liquibase.org/xml/ns/mongodb/liquibase-mongodb-latest.xsd">
+
+    <changeSet id="init-payment-event-documentation" author="mkhalez">
+        <mongodb:createCollection collectionName="payment_events">
+            <mongodb:options>
+                {
+                    validator: {
+                        $jsonSchema: {
+                            bsonType: "object",
+                            required: ["_id", "payment_status", "order_id", "created_at", "event_status", "attempt_count", "next_attempt_at"],
+                            properties: {
+                            _id: {
+                                bsonType: "objectId"
+                            }
+                            payment_status: {
+                                bsonType: "string"
+                            },
+                            created_at: {
+                                bsonType: "date"
+                            },
+                            event_status: {
+                                bsonType: "string"
+                            },
+                            attempt_count: {
+                                bsonType: "int"
+                            },
+                            next_attempt_at: {
+                                bsonType: "date"
+                            },
+                            order_id: {
+                                bsonType: "int",
+                            },
+                            sending_started_at: {
+                                bsonType: "date",
+                            }
+                        }
+                    }
+                },
+                validationAction: "error",
+                validationLevel: "strict"
+                }
+            </mongodb:options>
+        </mongodb:createCollection>
+    </changeSet>
+
+</databaseChangeLog>

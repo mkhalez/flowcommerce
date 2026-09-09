@@ -2,18 +2,17 @@ package com.coworking.space.paymentservice.services.implementation;
 
 import com.coworking.space.paymentservice.clients.OrderServiceClient;
 import com.coworking.space.paymentservice.domain.entities.PaymentEntity;
-import com.coworking.space.paymentservice.domain.exceptions.PaymentAlreadyProcessed;
-import com.coworking.space.paymentservice.domain.exceptions.PaymentInPendingStatus;
-import com.coworking.space.paymentservice.domain.exceptions.PaymentNotFoundException;
-import com.coworking.space.paymentservice.domain.exceptions.UserServiceException;
+import com.coworking.space.paymentservice.domain.exceptions.*;
 import com.coworking.space.paymentservice.domain.statuses.PaymentStatus;
 import com.coworking.space.paymentservice.dto.response.OrderResponse;
+import com.coworking.space.paymentservice.dto.response.OrderStatusResponse;
 import com.coworking.space.paymentservice.dto.response.PaymentResponse;
 import com.coworking.space.paymentservice.dto.response.SumResult;
 import com.coworking.space.paymentservice.infrastructure.properties.PaymentCreationProperties;
 import com.coworking.space.paymentservice.mappers.PaymentMapper;
 import com.coworking.space.paymentservice.repositories.PaymentRepository;
 import com.coworking.space.paymentservice.services.PaymentService;
+import com.coworking.space.paymentservice.services.util.PaymentEventWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -33,10 +32,12 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderServiceClient orderServiceClient;
     private final PaymentCreationProperties paymentCreationProperties;
     private final BankServiceImpl bankService;
+    private final PaymentEventWriter paymentEventWriter;
 
     private static final String PAYMENT_NOT_FOUND_EXCEPTION = "payment not found exception";
     private static final String PAYMENT_IN_PENDING_STATUS = "payment in pending status";
     private static final String PAYMENT_ALREADY_PROCESSED = "payment already processed";
+    private static final String PAYMENT_ALREADY_IN_PROCESSED = "payment already processed";
 
     @Override
     public PaymentResponse createPayment(int orderId) {
@@ -62,6 +63,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new UserServiceException(e);
         }
 
+        if(orderResponse.getStatus() != OrderStatusResponse.CREATED && orderResponse.getStatus() != OrderStatusResponse.CANCELED) {
+            throw new PaymentAlreadyProcessedException(PAYMENT_ALREADY_IN_PROCESSED);
+        }
+
         ObjectId id = entity != null ? entity.getId() : null;
         PaymentEntity newPaymentEntity = new PaymentEntity(
                 id,
@@ -79,9 +84,9 @@ public class PaymentServiceImpl implements PaymentService {
         } else {
             newPaymentEntity.setStatus(PaymentStatus.FAIL);
         }
-        var savedEntity = paymentRepo.save(newPaymentEntity);
+        paymentEventWriter.savePaymentAndEvent(newPaymentEntity);
 
-        return paymentMapper.toPaymentResponse(savedEntity);
+        return paymentMapper.toPaymentResponse(newPaymentEntity);
     }
 
     @Override

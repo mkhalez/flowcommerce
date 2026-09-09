@@ -1,13 +1,10 @@
 spring:
+  profiles:
+    default: local
   config:
     import: optional:file:payment-service/.env[.properties]
   application:
     name: payment-service
-  data:
-    mongodb:
-      uri: mongodb://localhost:8085/${MONGODB_DB}
-      username: ${MONGODB_USER}
-      password: ${MONGODB_PASSWORD}
 
 server:
   port: 8084
@@ -15,3 +12,10 @@ server:
 payment-creation:
   minutesDelta: 3
 
+payment:
+  sender:
+    scheduler.fixed.delay: 5000
+    max-attempts: 3
+    limit: 10
+    base-attempt-second: 2
+    time-to-send-minutes: 2

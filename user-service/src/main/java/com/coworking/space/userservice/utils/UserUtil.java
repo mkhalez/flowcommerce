@@ -20,7 +20,7 @@ public class UserUtil {
     }
 
     public int getUserIdByAuthId(String authId) {
-        var entity =  userRepo.findByAuthId(authId)
+        var entity =  userRepo.findByAuthUserId(authId)
                 .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND_ERROR));
 
         return entity.getId();
