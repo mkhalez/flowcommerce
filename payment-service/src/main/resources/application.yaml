@@ -5,22 +5,6 @@ spring:
     import: optional:file:payment-service/.env[.properties]
   application:
     name: payment-service
-  kafka:
-    bootstrap-servers:
-      - localhost:29092
-      - localhost:29093
-      - localhost:29094
-    producer.properties:
-      acks: all
-      batch.size: 1024
-      linger.ms: 2000
-      schema.registry.url: "http://localhost:8087"
-      value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
-      max.block.ms: 3000
-      request.timeout.ms: 3000
-      delivery.timeout.ms: 10000
-      enable.idempotence: true
-      max.in.flight.requests.per.connection: 5
 
 server:
   port: 8084
