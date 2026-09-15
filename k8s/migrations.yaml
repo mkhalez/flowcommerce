@@ -1,0 +1,152 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: user-liquibase
+  namespace: microservices
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16
+          command: ["sh", "-c", "until pg_isready -h user-postgres -p 5432 -U $POSTGRES_USER; do sleep 3; done"]
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: USER_SERVICE_POSTGRES_USER
+      containers:
+        - name: liquibase
+          image: mkhalez/user-migration:v1
+          env:
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_POSTGRES_DB } }
+            - name: LIQUIBASE_COMMAND_URL
+              value: "jdbc:postgresql://user-postgres:5432/$(POSTGRES_DB)"
+            - name: LIQUIBASE_COMMAND_USERNAME
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_POSTGRES_USER } }
+            - name: LIQUIBASE_COMMAND_PASSWORD
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_POSTGRES_PASSWORD } }
+            - name: LIQUIBASE_COMMAND_CHANGELOG_FILE
+              value: "changelog/changelog.xml"
+          args: ["update"]
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-liquibase
+  namespace: microservices
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16
+          command: ["sh", "-c", "until pg_isready -h auth-postgres -p 5432 -U $POSTGRES_USER; do sleep 3; done"]
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: auth-service-secret
+                  key: AUTH_SERVICE_POSTGRES_USER
+      containers:
+        - name: liquibase
+          image: mkhalez/auth-migration:v1
+          env:
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_SERVICE_POSTGRES_DB } }
+            - name: LIQUIBASE_COMMAND_URL
+              value: "jdbc:postgresql://auth-postgres:5432/$(POSTGRES_DB)"
+            - name: LIQUIBASE_COMMAND_USERNAME
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_SERVICE_POSTGRES_USER } }
+            - name: LIQUIBASE_COMMAND_PASSWORD
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_SERVICE_POSTGRES_PASSWORD } }
+            - name: LIQUIBASE_COMMAND_CHANGELOG_FILE
+              value: "changelog/changelog.xml"
+          args: ["update"]
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: order-liquibase
+  namespace: microservices
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16
+          command: ["sh", "-c", "until pg_isready -h order-postgres -p 5432 -U $POSTGRES_USER; do sleep 3; done"]
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: order-service-secret
+                  key: ORDER_SERVICE_POSTGRES_USER
+      containers:
+        - name: liquibase
+          image: mkhalez/order-migration:v1
+          env:
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: order-service-secret, key: ORDER_SERVICE_POSTGRES_DB } }
+            - name: LIQUIBASE_COMMAND_PASSWORD
+              valueFrom: { secretKeyRef: { name: order-service-secret, key: ORDER_SERVICE_POSTGRES_PASSWORD } }
+            - name: LIQUIBASE_COMMAND_URL
+              value: "jdbc:postgresql://order-postgres:5432/$(POSTGRES_DB)"
+            - name: LIQUIBASE_COMMAND_USERNAME
+              valueFrom: { secretKeyRef: { name: order-service-secret, key: ORDER_SERVICE_POSTGRES_USER } }
+            - name: LIQUIBASE_COMMAND_CHANGELOG_FILE
+              value: "changelog/changelog.xml"
+          args: ["update"]
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-liquibase
+  namespace: microservices
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-mongo
+          image: mongo:7.0
+          env:
+            - name: MONGODB_USER
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_USER } }
+            - name: MONGODB_PASSWORD
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_PASSWORD } }
+          command:
+            - sh
+            - -c
+            - |
+              until mongosh --host payment-mongodb \
+                  -u "$MONGODB_USER" -p "$MONGODB_PASSWORD" \
+                  --authenticationDatabase admin --quiet \
+                  --eval 'db.runCommand({ ping: 1 }).ok' | grep -q '^1$'; do
+                echo "waiting for mongo replica set to be ready..."
+                sleep 5
+              done
+      containers:
+        - name: liquibase
+          image: mkhalez/payment-migration:v4
+          env:
+            - name: MONGODB_DB
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_DB } }
+            - name: LIQUIBASE_COMMAND_URL
+              value: "mongodb://payment-mongodb:27017/$(MONGODB_DB)?authSource=admin"
+            - name: LIQUIBASE_COMMAND_USERNAME
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_USER } }
+            - name: LIQUIBASE_COMMAND_PASSWORD
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_PASSWORD } }
+            - name: LIQUIBASE_COMMAND_CHANGELOG_FILE
+              value: "changelog/changelog.xml"
+          args: ["--log-level=DEBUG", "update"]

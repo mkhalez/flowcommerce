@@ -18,3 +18,20 @@ server:
 cache:
   ttl-in-minutes: 10
   usersKey: user
+
+kafka:
+  topics:
+    dlq:
+      user-registration-name: user-registration-dlt
+      partitions: 3
+      replicas: 3
+      user-rollback-registration-name: user-rollback-registration-dlt
+    user-rollback-registration-topic: user-rollback-registration
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3
+  concurrent-listeners: 3
+  auto-start: true
+  registration-topic: user-registration
