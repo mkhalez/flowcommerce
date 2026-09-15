@@ -1,0 +1,17 @@
+FROM liquibase/liquibase:4.29
+
+USER root
+
+RUN curl -fsSL -o /liquibase/lib/liquibase-mongodb.jar \
+      https://repo1.maven.org/maven2/org/liquibase/ext/liquibase-mongodb/4.29.2/liquibase-mongodb-4.29.2.jar && \
+    curl -fsSL -o /liquibase/lib/mongodb-driver-sync.jar \
+      https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-sync/5.2.0/mongodb-driver-sync-5.2.0.jar && \
+    curl -fsSL -o /liquibase/lib/mongodb-driver-core.jar \
+      https://repo1.maven.org/maven2/org/mongodb/mongodb-driver-core/5.2.0/mongodb-driver-core-5.2.0.jar && \
+    curl -fsSL -o /liquibase/lib/bson.jar \
+      https://repo1.maven.org/maven2/org/mongodb/bson/5.2.0/bson-5.2.0.jar && \
+    chmod 644 /liquibase/lib/*.jar
+
+COPY migrations/ /liquibase/changelog/
+
+USER liquibase
