@@ -1,0 +1,28 @@
+{
+  "type": "record",
+  "name": "UserRegistrationRequest",
+  "namespace": "com.coworking.space.authenticationservice.dto.broker.avro",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "surname",
+      "type": "string"
+    },
+    {
+      "name": "birthDay",
+      "type": "int",
+      "logicalType": "date"
+    },
+    {
+      "name": "email",
+      "type": "string"
+    },
+    {
+      "name": "authId",
+      "type": "int"
+    }
+  ]
+}

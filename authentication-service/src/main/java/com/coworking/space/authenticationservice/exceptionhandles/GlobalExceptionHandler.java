@@ -39,7 +39,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             RoleNotFoundException.class,
-            UsernameNotFoundException.class
+            UsernameNotFoundException.class,
+            RegistrationNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFoundException(Exception e) {
         log.atError().setCause(e).log();
@@ -72,6 +73,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDisableUserException(DisableUserException e) {
         log.atError().setCause(e).log();
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(PayloadSerializationException.class)
+    public ResponseEntity<ErrorResponse> handlePayloadSerializationException(PayloadSerializationException e) {
+        log.atError().setCause(e).log();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage()));
     }
 

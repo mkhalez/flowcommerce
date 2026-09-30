@@ -4,3 +4,12 @@ spring:
 
 auth-service:
   base-url: http://test
+
+registration:
+  sender:
+    scheduler.fixed.delay: 2000
+    delay: 1000
+    max-attempts: 3
+    limit: 10
+    baseAttemptSecond: 1
+    time-to-send-minutes: 2

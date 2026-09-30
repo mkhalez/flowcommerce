@@ -1,22 +1,26 @@
 package com.coworking.space.authenticationservice.services.implementation;
 
 import com.coworking.space.authenticationservice.clients.UserClient;
+import com.coworking.space.authenticationservice.domain.entities.RegistrationEventEntity;
 import com.coworking.space.authenticationservice.domain.entities.UserEntity;
 import com.coworking.space.authenticationservice.domain.exceptions.*;
 import com.coworking.space.authenticationservice.domain.models.Role;
 import com.coworking.space.authenticationservice.domain.models.User;
+import com.coworking.space.authenticationservice.domain.statuses.RegistrationEventStatus;
 import com.coworking.space.authenticationservice.dto.request.LoginRequest;
 import com.coworking.space.authenticationservice.dto.request.RefreshRequest;
 import com.coworking.space.authenticationservice.dto.request.SingUpRequest;
 import com.coworking.space.authenticationservice.dto.response.AuthResponse;
-import com.coworking.space.authenticationservice.mapers.RoleMapper;
-import com.coworking.space.authenticationservice.mapers.UserMapper;
-import com.coworking.space.authenticationservice.mapers.UserRequestMapper;
+import com.coworking.space.authenticationservice.dto.response.RegistrationStatusResponse;
+import com.coworking.space.authenticationservice.mapers.*;
+import com.coworking.space.authenticationservice.repositories.RegistrationEventRepository;
 import com.coworking.space.authenticationservice.repositories.RoleRepository;
 import com.coworking.space.authenticationservice.repositories.UserRepository;
 import com.coworking.space.authenticationservice.services.JwtService;
 import com.coworking.space.authenticationservice.services.AuthService;
 import com.coworking.space.authenticationservice.utils.CustomUserDetails;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,8 +33,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
+import java.time.OffsetDateTime;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,68 +53,62 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final JwtDecoder decoder;
     private final AuthenticationManager authenticationManager;
-    private final UserClient userClient;
-    private final UserRequestMapper userRequestMapper;
+    private final RegistrationEventRepository registrationEventRepo;
+    private final RegistrationMapper registrationMapper;
+    private final UserInfoMapper userInfoMapper;
+    private final ObjectMapper objectMapper;
 
     private static final String USERNAME_ALREADY_EXIST = "username already exist";
     private static final String USERNAME_NOT_FOUND = "username not found";
+    private static final String REGISTRATION_NOT_FOUND = "registration not found";
     private static final String REFRESH_TOKEN_ERROR = "refresh token invalid or expired";
     private static final String ROLE_NOT_FOUND = "role not found";
     private static final String USER_ROLE_NAME = "ROLE_USER";
     private static final String REFRESH_TYPE = "refresh";
     private static final String TOKEN_TYPE_NAME = "type";
     private static final String USER_IS_DISABLED = "user is disabled";
-    private static final boolean INIT_ACTIVE = true;
     private static final boolean INIT_DEACTIVE = false;
-    private static final String FAIL_USER_REGISTRATION_ERROR = "fail user registration error";
+    private static final int ZERO_ATTEMPT = 0;
+    private static final String PAYLOAD_SERIALIZATION_ERROR = "failed to serialize user registration payload";
 
     @Override
-    public AuthResponse register(SingUpRequest userRequest) {
+    @Transactional
+    public RegistrationStatusResponse register(SingUpRequest userRequest) {
         if(userRepo.existsByUsername(userRequest.getUsername())) {
             throw new UserAlreadyExistException(USERNAME_ALREADY_EXIST);
         }
 
         var roleEntity = roleRepo.findByName(USER_ROLE_NAME)
                 .orElseThrow(() -> new RoleNotFoundException(ROLE_NOT_FOUND));
-
         var userEntity = UserEntity.builder()
                 .username(userRequest.getUsername())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
                 .roles(Set.of(roleEntity))
                 .active(INIT_DEACTIVE)
                 .build();
+        var savedUser = userRepo.save(userEntity);
 
-        var saved = userRepo.save(userEntity);
+        String payload;
         try {
-            var userInfo = userRequestMapper.toUserServiceRequest(userRequest.getUserInfo(), saved.getId());
-            userClient.createUser(userInfo);
-            Set<Role> roles = saved.getRoles().stream()
-                    .map(roleMapper::toRole)
-                    .collect(Collectors.toSet());
-            User user = userMapper.toUser(saved, roles);
-            saved.setActive(INIT_ACTIVE);
-            userRepo.save(saved);
-
-            String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getRoles(), user.getId());
-            String refreshToken = jwtService.generateRefreshToken(user.getUsername());
-
-            log.atInfo().addKeyValue("event", "registration")
-                    .addKeyValue("username", userRequest.getUsername())
-                    .log();
-
-            return AuthResponse.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .build();
-        } catch (Exception e) {
-            log.atError().setCause(e).log();
-            try {
-                userRepo.deleteById(saved.getId());
-            } catch (Exception ex) {
-                log.error("Failed to cleanup user after external client failure: {}", saved.getId(), ex);
-            }
-            throw new FailUserRegistration(FAIL_USER_REGISTRATION_ERROR);
+            payload = objectMapper.writeValueAsString(userInfoMapper.toPayload(
+                    userRequest.getUserInfo(), savedUser.getId()));
+        } catch (JacksonException e) {
+            throw new PayloadSerializationException(PAYLOAD_SERIALIZATION_ERROR, e);
         }
+
+        var registrationEventEntity = RegistrationEventEntity.builder()
+                .user(savedUser)
+                .status(RegistrationEventStatus.CREATED)
+                .attemptCount(ZERO_ATTEMPT)
+                .nextAttemptAt(OffsetDateTime.now())
+                .payload(payload)
+                .build();
+
+        var savedRegistrationEvent = registrationEventRepo.save(registrationEventEntity);
+        return RegistrationStatusResponse.builder()
+                .transactionId(savedRegistrationEvent.getId())
+                .status(savedRegistrationEvent.getStatus())
+                .build();
     }
 
     @Override
@@ -185,5 +187,13 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Override
+    public RegistrationStatusResponse checkRegistrationStatus(UUID registrationId) {
+        var entity = registrationEventRepo.findById(registrationId)
+                .orElseThrow(() -> new RegistrationNotFoundException(REGISTRATION_NOT_FOUND));
+
+        return registrationMapper.toRegistrationStatusResponse(entity);
     }
 }

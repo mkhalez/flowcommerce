@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "PaymentOrderEvent",
+  "namespace": "com.coworking.space.paymentservice.dto.broker.avro",
+  "fields": [
+    {
+      "name": "orderId",
+      "type": "int"
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "RegistrationStatus",
+        "symbols": ["SUCCESS", "FAIL"]
+      }
+    }
+  ]
+}

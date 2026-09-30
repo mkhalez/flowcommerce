@@ -10,6 +10,7 @@
     <include relativeToChangelogFile="true" file="create-table/create-orders-table.sql"/>
     <include relativeToChangelogFile="true" file="create-table/create-items-table.sql"/>
     <include relativeToChangelogFile="true" file="create-table/create-order-items-table.sql"/>
+    <include relativeToChangelogFile="true" file="create-table/create-payment-event.sql"/>
     
     <include relativeToChangelogFile="true" file="create-indexes/create-orders-indexes.sql"/>
 

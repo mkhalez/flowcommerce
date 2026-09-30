@@ -5,6 +5,7 @@ import com.coworking.space.userservice.domain.entities.UserEntity;
 import com.coworking.space.userservice.dto.requests.UserCreateRequest;
 import com.coworking.space.userservice.dto.requests.UserUpdateRequest;
 import com.coworking.space.userservice.dto.responses.UserResponse;
+import com.coworking.space.userservice.exception.DuplicateEmailException;
 import com.coworking.space.userservice.exception.UserAlreadyExistException;
 import com.coworking.space.userservice.exception.UserNotFoundException;
 import com.coworking.space.userservice.mapper.UserMapper;
@@ -43,11 +44,16 @@ public class UserServiceImpl implements UserService {
     private static final String SORTING_BY_ID = "id";
     private static final String USER_NOT_FOUND_ERROR = "user not found";
     private static final String USER_ALREADY_EXIST = "user already exist";
+    private static final String DUPLICATE_EMAIL_ERROR = "duplicate email: ";
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
         if(userRepo.existsByAuthUserId(request.getAuthId())) {
             throw new UserAlreadyExistException(USER_ALREADY_EXIST);
+        }
+
+        if(userRepo.existsByEmail(request.getEmail())) {
+            throw new DuplicateEmailException(DUPLICATE_EMAIL_ERROR + request.getEmail());
         }
 
         var entity = userMapper.toUserEntity(request, request.getAuthId());

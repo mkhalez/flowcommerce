@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:mongodb="http://www.liquibase.org/xml/ns/mongodb"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+         http://www.liquibase.org/xml/ns/mongodb
+         http://www.liquibase.org/xml/ns/mongodb/liquibase-mongodb-latest.xsd">
+
+    <changeSet id="init-order-id-payments-index" author="mkhalez">
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { order_id: 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                {unique: true, name: "order_id_payments_index"}
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="init-status-payments-index" author="mkhalez">
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { status: 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                {name: "status_payments_index"}
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="init-user-id-and-timestamp-payments-index" author="mkhalez">
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { user_id: 1, timestamp: 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                {name: "user_id_and_timestamp_payments_index"}
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+    <changeSet id="init-timestamp-payments-index" author="mkhalez">
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>{ timestamp: 1 }</mongodb:keys>
+            <mongodb:options>{ name: "timestamp_payments_index" }</mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+</databaseChangeLog>
