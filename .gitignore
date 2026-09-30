@@ -60,3 +60,5 @@ payment-service/.env
 payment-service/mvnw
 payment-service/mongo-keyfile
 
+mongo-keyfile
+

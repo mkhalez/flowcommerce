@@ -1,30 +1,32 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${AUTH_SERVICE_HOST}:${AUTH_PORT}/.well-known/jwks.json
+
+  mongodb:
+    uri: mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_DB}?authSource=${MONGODB_AUTH_SOURCE}&replicaSet=${MONGODB_REPLICA_SET_NAME}
+
   kafka:
     bootstrap-servers:
-      - localhost:29092
-      - localhost:29093
-      - localhost:29094
+      - ${KAFKA_BROKER_HOST_1}:${KAFKA_BROKER_PORT_1}
+      - ${KAFKA_BROKER_HOST_2}:${KAFKA_BROKER_PORT_2}
+      - ${KAFKA_BROKER_HOST_3}:${KAFKA_BROKER_PORT_3}
     producer.properties:
       acks: all
       batch.size: 1024
       linger.ms: 2000
-      schema.registry.url: "http://localhost:8087"
+      schema.registry.url: "http://${SCHEMA_REGISTRY_HOST}:${SCHEMA_REGISTRY_PORT}"
       value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
       max.block.ms: 3000
       request.timeout.ms: 3000
       delivery.timeout.ms: 10000
       enable.idempotence: true
       max.in.flight.requests.per.connection: 5
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://localhost:8081/.well-known/jwks.json
-  mongodb:
-      uri: mongodb://user:password@localhost:27017/payments?authSource=admin&replicaSet=rs0
 
 order-service:
-  base-url: http://localhost:8082/api/order
+  base-url: http://${ORDER_SERVICE_HOST}:${ORDER_SERVICE_PORT}/api/order
   connection-timeout: 3000
   read-timeout: 3000
 

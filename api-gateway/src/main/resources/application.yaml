@@ -58,6 +58,7 @@ app:
     - /api/auth/**
     - /api/user/**
     - /api/order/**
+    - /api/payment/**
   deny-routes:
     - /api/user/register
 
