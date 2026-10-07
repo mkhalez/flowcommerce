@@ -1,0 +1,3 @@
+kubectl create secret generic mongodb-keyfile \
+  --from-file=mongo-keyfile=./mongo-keyfile \
+  -n microservices

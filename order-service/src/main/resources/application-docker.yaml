@@ -1,15 +1,44 @@
 spring:
   datasource:
-    url: jdbc:postgresql://order-postgres:5432/${POSTGRES_DOCKER_DB}
-    username: ${POSTGRES_DOCKER_USER}
-    password: ${POSTGRES_DOCKER_PASSWORD}
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://auth-service:8081/.well-known/jwks.json
+          jwk-set-uri: http://${AUTH_SERVICE_HOST}:${AUTH_PORT}/.well-known/jwks.json
+  kafka:
+    bootstrap-servers:
+      - ${KAFKA_BROKER_HOST_1}:${KAFKA_BROKER_PORT_1}
+      - ${KAFKA_BROKER_HOST_2}:${KAFKA_BROKER_PORT_2}
+      - ${KAFKA_BROKER_HOST_3}:${KAFKA_BROKER_PORT_3}
+    consumer.properties:
+      enable.auto.commit: false
+      auto.offset.reset: earliest
+      isolation.level: read_committed
+      fetch.min.bytes: 16
+      fetch.max.bytes: 1048576
+      fetch.max.wait.ms: 10000
+      max.poll.interval.ms: 50000
+      max.poll.records: 10
+      schema.registry.url: "http://${SCHEMA_REGISTRY_HOST}:${SCHEMA_REGISTRY_PORT}"
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      specific.avro.reader: true
+      group.id: orderService
 
 user-service:
-  base-url: http://order-service:8082/api/user
+  base-url: http://${USER_SERVICE_HOST}:${USER_SERVICE_PORT}/api/user
   connection-timeout: 3000
   read-timeout: 3000
+
+kafka:
+  topics:
+    retry-policy:
+      backoff:
+        delay: 2000
+        multiplier: 2
+      attempts: 3
+  concurrent-listeners: 3
+  auto-start: true
+  payment-operations-result-topic: payment-operations-result

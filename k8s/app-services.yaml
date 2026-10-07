@@ -1,0 +1,311 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: auth-service }
+  template:
+    metadata:
+      labels: { app: auth-service }
+    spec:
+      containers:
+        - name: auth-service
+          image: mkhalez/authentication-service:v1
+          env:
+            - name: POSTGRES_HOST
+              value: "auth-postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_SERVICE_POSTGRES_DB } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_SERVICE_POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_SERVICE_POSTGRES_PASSWORD } }
+            - name: KAFKA_BROKER_HOST_1
+              value: "kafka-broker-0.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_2
+              value: "kafka-broker-1.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_3
+              value: "kafka-broker-2.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_PORT_1
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_0 } }
+            - name: KAFKA_BROKER_PORT_2
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_1 } }
+            - name: KAFKA_BROKER_PORT_3
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_2 } }
+            - name: SCHEMA_REGISTRY_HOST
+              value: "schema-registry"
+            - name: SCHEMA_REGISTRY_PORT
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: SCHEMA_REGISTRY_PORT } }
+            - name: AUTH_ADMIN_USERNAME
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_ADMIN_USERNAME } }
+            - name: AUTH_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: auth-service-secret, key: AUTH_ADMIN_PASSWORD } }
+            - name: USER_SERVICE_HOST
+              value: "user-service"
+            - name: USER_SERVICE_PORT
+              value: "8080"
+            - name: SERVER_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: microservices
+spec:
+  selector: { app: auth-service }
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: user-service }
+  template:
+    metadata:
+      labels: { app: user-service }
+    spec:
+      containers:
+        - name: user-service
+          image: mkhalez/user-service:v1
+          env:
+            - name: POSTGRES_HOST
+              value: "user-postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_POSTGRES_DB } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_POSTGRES_PASSWORD } }
+            - name: USER_SERVICE_REDIS_HOST
+              value: "user-service-redis"
+            - name: USER_SERVICE_REDIS_PORT
+              value: "6379"
+            - name: USER_SERVICE_REDIS_PASSWORD
+              valueFrom: { secretKeyRef: { name: user-service-secret, key: USER_SERVICE_REDIS_PASSWORD } }
+            - name: AUTH_SERVICE_HOST
+              value: "auth-service"
+            - name: AUTH_PORT
+              value: "8080"
+            - name: AUTH_HOST
+              value: "auth-service"
+            - name: KAFKA_BROKER_HOST_1
+              value: "kafka-broker-0.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_2
+              value: "kafka-broker-1.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_3
+              value: "kafka-broker-2.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_PORT_1
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_0 } }
+            - name: KAFKA_BROKER_PORT_2
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_1 } }
+            - name: KAFKA_BROKER_PORT_3
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_2 } }
+            - name: SCHEMA_REGISTRY_HOST
+              value: "schema-registry"
+            - name: SCHEMA_REGISTRY_PORT
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: SCHEMA_REGISTRY_PORT } }
+            - name: SERVER_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: microservices
+spec:
+  selector: { app: user-service }
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: order-service }
+  template:
+    metadata:
+      labels: { app: order-service }
+    spec:
+      containers:
+        - name: order-service
+          image: mkhalez/order-service:v1
+          env:
+            - name: POSTGRES_HOST
+              value: "order-postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: order-service-secret, key: ORDER_SERVICE_POSTGRES_DB } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: order-service-secret, key: ORDER_SERVICE_POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: order-service-secret, key: ORDER_SERVICE_POSTGRES_PASSWORD } }
+            - name: AUTH_SERVICE_HOST
+              value: "auth-service"
+            - name: AUTH_PORT
+              value: "8080"
+            - name: AUTH_HOST
+              value: "auth-service"
+            - name: USER_SERVICE_HOST
+              value: "user-service"
+            - name: USER_SERVICE_PORT
+              value: "8080"
+            - name: KAFKA_BROKER_HOST_1
+              value: "kafka-broker-0.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_2
+              value: "kafka-broker-1.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_3
+              value: "kafka-broker-2.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_PORT_1
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_0 } }
+            - name: KAFKA_BROKER_PORT_2
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_1 } }
+            - name: KAFKA_BROKER_PORT_3
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_2 } }
+            - name: SCHEMA_REGISTRY_HOST
+              value: "schema-registry"
+            - name: SCHEMA_REGISTRY_PORT
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: SCHEMA_REGISTRY_PORT } }
+            - name: SERVER_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: microservices
+spec:
+  selector: { app: order-service }
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: payment-service }
+  template:
+    metadata:
+      labels: { app: payment-service }
+    spec:
+      containers:
+        - name: payment-service
+          image: mkhalez/payment-service:v1
+          env:
+            - name: AUTH_SERVICE_HOST
+              value: "auth-service"
+            - name: AUTH_PORT
+              value: "8080"
+            - name: ORDER_SERVICE_HOST
+              value: "order-service"
+            - name: ORDER_SERVICE_PORT
+              value: "8080"
+            - name: KAFKA_BROKER_HOST_1
+              value: "kafka-broker-0.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_2
+              value: "kafka-broker-1.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_HOST_3
+              value: "kafka-broker-2.kafka-broker.microservices.svc.cluster.local"
+            - name: KAFKA_BROKER_PORT_1
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_0 } }
+            - name: KAFKA_BROKER_PORT_2
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_1 } }
+            - name: KAFKA_BROKER_PORT_3
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: KAFKA_BROKER_PORT_2 } }
+            - name: SCHEMA_REGISTRY_HOST
+              value: "schema-registry"
+            - name: SCHEMA_REGISTRY_PORT
+              valueFrom: { configMapKeyRef: { name: kafka-config, key: SCHEMA_REGISTRY_PORT } }
+            - name: API_KEY
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: API_KEY } }
+            - name: MONGODB_USER
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_USER } }
+            - name: MONGODB_PASSWORD
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_PASSWORD } }
+            - name: MONGODB_HOST
+              value: "payment-mongodb"
+            - name: MONGODB_PORT
+              value: "27017"
+            - name: MONGODB_DB
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_DB } }
+            - name: MONGODB_AUTH_SOURCE
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_AUTH_SOURCE } }
+            - name: MONGODB_REPLICA_SET_NAME
+              valueFrom: { secretKeyRef: { name: payment-service-secret, key: MONGODB_REPLICA_SET_NAME } }
+            - name: SERVER_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: 8080 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: microservices
+spec:
+  selector: { app: payment-service }
+  ports:
+    - port: 8080
+      targetPort: 8080

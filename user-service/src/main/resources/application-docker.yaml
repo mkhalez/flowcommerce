@@ -1,19 +1,58 @@
 spring:
   datasource:
-    url: jdbc:postgresql://user-postgres:5432/${POSTGRES_DOCKER_DB}
-    username: ${POSTGRES_DOCKER_USER}
-    password: ${POSTGRES_DOCKER_PASSWORD}
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   data:
     redis:
-      host: redis
-      port: 6379
+      host: ${USER_SERVICE_REDIS_HOST}
+      port: ${USER_SERVICE_REDIS_PORT}
       timeout: 60000
-      password: ${REDIS_DOCKER_PASSWORD}
+      password: ${USER_SERVICE_REDIS_PASSWORD}
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://auth-service:8081/.well-known/jwks.json
+          jwk-set-uri: http://${AUTH_SERVICE_HOST}:${AUTH_PORT}/.well-known/jwks.json
+
+  kafka:
+    bootstrap-servers:
+      - ${KAFKA_BROKER_HOST_1}:${KAFKA_BROKER_PORT_1}
+      - ${KAFKA_BROKER_HOST_2}:${KAFKA_BROKER_PORT_2}
+      - ${KAFKA_BROKER_HOST_3}:${KAFKA_BROKER_PORT_3}
+    producer.properties:
+      acks: all
+      batch.size: 1024
+      linger.ms: 2000
+      schema.registry.url: "http://${SCHEMA_REGISTRY_HOST}:${SCHEMA_REGISTRY_PORT}"
+      value.subject.name.strategy: "io.confluent.kafka.serializers.subject.TopicRecordNameStrategy"
+      max.block.ms: 3000
+      request.timeout.ms: 3000
+      delivery.timeout.ms: 10000
+      enable.idempotence: true
+      max.in.flight.requests.per.connection: 5
+    consumer.properties:
+      enable.auto.commit: false
+      auto.offset.reset: earliest
+      isolation.level: read_committed
+      fetch.min.bytes: 16
+      fetch.max.bytes: 1048576
+      fetch.max.wait.ms: 10000
+      max.poll.interval.ms: 50000
+      max.poll.records: 10
+      schema.registry.url: "http://${SCHEMA_REGISTRY_HOST}:${SCHEMA_REGISTRY_PORT}"
+      value.subject.name.strategy: io.confluent.kafka.serializers.subject.TopicRecordNameStrategy
+      specific.avro.reader: true
+      group.id: userService
 
 auth-service:
-  base-url: http://auth-service:8081/internal
+  base-url: http://${AUTH_HOST}:${AUTH_PORT}/internal
+
+registration:
+  sender:
+    scheduler.fixed.delay: 2000
+    delay: 1000
+    max-attempts: 3
+    limit: 10
+    baseAttemptSecond: 1
+    time-to-send-minutes: 2

@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-mongodb
+  namespace: microservices
+spec:
+  clusterIP: None
+  selector:
+    app: payment-mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: payment-mongodb
+  namespace: microservices
+spec:
+  selector:
+    matchLabels:
+      app: payment-mongodb
+  serviceName: payment-mongodb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: payment-mongodb
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongodb
+          image: mongo:7.0
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGODB_DB
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: MONGODB_DB
+            - name: MONGODB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: MONGODB_USER
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: payment-service-secret
+                  key: MONGODB_PASSWORD
+          command:
+            - bash
+            - -c
+            - |
+              cp /etc/mongo-keyfile/mongo-keyfile /keyfile-ready/mongo-keyfile
+              chown mongodb:mongodb /keyfile-ready/mongo-keyfile
+              chmod 400 /keyfile-ready/mongo-keyfile
+              exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --keyFile /keyfile-ready/mongo-keyfile
+          volumeMounts:
+            - name: payment-service-store
+              mountPath: /data/db
+            - name: keyfile
+              mountPath: /etc/mongo-keyfile
+              readOnly: true
+            - name: keyfile-ready
+              mountPath: /keyfile-ready
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - >
+                  mongosh --quiet --eval "
+                  try { rs.status(); } catch (err) {
+                    try {
+                      rs.initiate({_id:'rs0', members:[{_id:0, host:'payment-mongodb-0.payment-mongodb.microservices.svc.cluster.local:27017'}]});
+                    } catch (err2) { }
+                  }
+                  try {
+                    db.getSiblingDB('admin').createUser({user: '$MONGODB_USER', pwd: '$MONGODB_PASSWORD', roles: [{role: 'root', db: 'admin'}]});
+                  } catch (err3) { }
+                  print('ok');
+                  "
+            initialDelaySeconds: 10
+            periodSeconds: 15
+      volumes:
+        - name: keyfile
+          secret:
+            secretName: mongodb-keyfile
+            defaultMode: 0400
+        - name: keyfile-ready
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: payment-service-store
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service-redis
+  namespace: microservices
+spec:
+  clusterIP: None
+  selector:
+    app: user-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: user-redis
+  namespace: microservices
+spec:
+  selector:
+    matchLabels:
+      app: user-redis
+  serviceName: user-service-redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: user-redis
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: redis
+          image: redis:7.4-alpine
+          ports:
+            - containerPort: 6379
+          env:
+            - name: USER_SERVICE_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: user-service-secret
+                  key: USER_SERVICE_REDIS_PASSWORD
+          command: ["sh", "-c", "redis-server --requirepass $USER_SERVICE_REDIS_PASSWORD --appendonly yes"]
+          volumeMounts:
+            - name: user-service-redis-store
+              mountPath: /data
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "redis-cli -a $USER_SERVICE_REDIS_PASSWORD ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "redis-cli -a $USER_SERVICE_REDIS_PASSWORD ping"]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: user-service-redis-store
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
